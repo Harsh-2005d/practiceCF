@@ -17,11 +17,28 @@ type user={
     best:number,
     email:string,
     isLogged:boolean
-
 }
-export default function ProfilePage(user:user) {
-  const [showGraph, setShowGraph] = useState(false);
 
+export default function ProfilePage(user:user) {
+  const [User, setUser] = useState<user>({
+  handle: "",
+  rank: "",
+  rating: 0,
+  maxRank: "",
+  best: 0,
+  email: "",
+  isLogged: false
+});
+
+  const [handle,setHandle]=useState("")
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    setUser({
+      ...user,
+      isLogged:true
+    });
+  };
   user = {
     handle: "harsh_dahiya",
     rank: "Newbie",
@@ -40,7 +57,20 @@ export default function ProfilePage(user:user) {
         <div className="profile-card">
           <div className="profile-info">
             <p className="rank">{user.rank}</p>
-            <h1 className="handle">{user.handle}</h1>
+            {user.isLogged ? (
+              <h1 className="handle">{user.handle}</h1>
+            ) : (
+              <form onSubmit={handleSubmit}>
+                <input
+                  type="text"
+                  placeholder="Enter your handle"
+                  value={handle}
+                  onChange={(e) => setHandle(e.target.value)}
+                  required
+                />
+                <button type="submit">Submit</button>
+              </form>
+            )}
 
             <div className="stats">
               <div className="stat">
@@ -58,16 +88,10 @@ export default function ProfilePage(user:user) {
               </div>
             </div>
           </div>
-
-          <div className="profile-actions">
-            <button className="toggle-btn" onClick={() => setShowGraph((v) => !v)}>
-              {showGraph ? "Hide Rating Graph" : "Plot CF Rating Graph"}
-            </button>
-          </div>
         </div>
 
         {/* Graph Card */}
-        {showGraph && (
+        (
           <div className="graph-card">
             <h2 className="graph-title">Rating Progress</h2>
             <div className="graph-wrapper">
@@ -81,7 +105,7 @@ export default function ProfilePage(user:user) {
               </ResponsiveContainer>
             </div>
           </div>
-        )}
+        )
 
       </div>
     </div>
