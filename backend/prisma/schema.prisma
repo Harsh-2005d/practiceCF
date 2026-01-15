@@ -21,8 +21,6 @@ model Solve {
 
 model User {
   id           String   @id
-  email        String   @unique
-  passwordHash String
   handle       String   @unique
   rating       Int?
   createdAt    DateTime @default(now())
