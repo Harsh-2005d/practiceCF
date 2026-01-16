@@ -1,20 +1,4 @@
-interface CodeforcesResponse<T> {
-  status: "OK" | "FAILED";
-  result: T;
-  comment?: string;
-}
-
-interface CodeforcesUser {
-  handle: string;
-  rating?: number;
-  rank?: string;
-  maxRating?: number;
-  maxRank?: string;
-  contribution: number;
-  friendOfCount: number;
-  avatar: string;
-  titlePhoto: string;
-}
+import { CodeforcesResponse,CodeforcesUser } from "../types/codeforces";
 
 export async function getUserInfo(handle: string): Promise<CodeforcesUser> {
   const res = await fetch(

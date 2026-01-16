@@ -14,9 +14,26 @@ export interface CfProblem {
     problem: CfProblem;
   }
   
-  export interface CfResponse<T> {
+export interface CfResponse<T> {
     status: "OK" | "FAILED";
     result: T;
     comment?: string;
   }
   
+export interface CodeforcesResponse<T> {
+  status: "OK" | "FAILED";
+  result: T;
+  comment?: string;
+}
+
+ export interface CodeforcesUser {
+  handle: string;
+  rating?: number;
+  rank?: string;
+  maxRating?: number;
+  maxRank?: string;
+  contribution: number;
+  friendOfCount: number;
+  avatar: string;
+  titlePhoto: string;
+}
