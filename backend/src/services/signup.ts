@@ -1,5 +1,5 @@
 import {prisma} from "../prismac"
-import { getUserInfo } from "../middleware/codeforces";
+import { getUserInfo } from "./codeforces";
 import { randomUUID } from "crypto";
 import { syncUserSolves } from "../jobs/syncSolves.job";
 
