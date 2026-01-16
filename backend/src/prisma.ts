@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import {prisma} from "../prismac"
+import {prisma} from "./prismac"
 
 interface CfUser {
   handle: string;
@@ -19,3 +19,5 @@ export async function findOrCreateUser(cfUser: CfUser) {
     }
   });
 }
+export { prisma };
+

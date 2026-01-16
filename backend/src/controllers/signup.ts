@@ -1,6 +1,8 @@
 import {prisma} from "../prismac"
 import { getUserInfo } from "../middleware/codeforces";
 import { randomUUID } from "crypto";
+import { syncUserSolves } from "../jobs/syncSolves.job";
+
 
 export const signupWithHandle = async (handle: string) => {
   // 1. Check if handle exists on Codeforces
@@ -28,5 +30,6 @@ export const signupWithHandle = async (handle: string) => {
     }
   });
 
+  syncUserSolves(newUser.id, newUser.handle)
   return newUser;
 };
