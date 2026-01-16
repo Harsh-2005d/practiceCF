@@ -66,6 +66,7 @@ export async function syncLast30DaysSolves(
     }
 
     from += PAGE_SIZE;
+    console.log("working")
     await sleep(DELAY_MS);
   }
 

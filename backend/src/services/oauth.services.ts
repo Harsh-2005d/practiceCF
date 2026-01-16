@@ -1,7 +1,8 @@
 import { prisma } from "../prismac";
 import { randomUUID } from "crypto";
 import { signToken } from "../utils/jwt";
-
+import { syncLast30DaysSolves } from "./cfSolveSync.service";
+import { GoogleTokenResponse } from "../types/codeforces";
 type GoogleUser = {
   sub: string;
   email: string;
@@ -23,7 +24,7 @@ export const googleOAuthLogin = async (code: string) => {
     })
   });
 
-  const tokenData = await tokenRes.json();
+  const tokenData = (await tokenRes.json()) as GoogleTokenResponse
   if (!tokenData.access_token) {
     throw new Error("Google OAuth token exchange failed");
   }
@@ -45,31 +46,19 @@ export const googleOAuthLogin = async (code: string) => {
   });
 
   if (!user) {
-    // Generate a handle (unique)
-    const baseHandle = googleUser.email.split("@")[0];
-    let handle = baseHandle;
-
-    const exists = await prisma.user.findUnique({ where: { handle } });
-    if (exists) {
-      handle = `${baseHandle}_${Math.floor(Math.random() * 10000)}`;
-    }
-
+  
     user = await prisma.user.create({
       data: {
         id: randomUUID(),
         email: googleUser.email,
-        handle,
-        rating: null,
         oauthProvider: "google",
         oauthId: googleUser.sub
       }
     });
 
-    // Optional: initial sync
-    // syncLast30DaysSolves(user.id, user.handle);
   }
 
   // 4. Issue your JWT
-  const token = signToken({ userId: user.id, handle: user.handle });
+  const token = signToken({ userId: user.id, email: user.email });
   return { user, token };
 };

@@ -5,7 +5,7 @@ const JWT_EXPIRES_IN: number = 60 * 60 * 24 * 7;;
 
 export type JwtPayload = {
   userId: string;
-  handle: string;
+  email: string;
 };
 
 export function signToken(payload: JwtPayload): string {
