@@ -1,10 +1,8 @@
 import { Router } from "express";
-import { googleCallbackController, loginController } from "../controllers/auth.controller";
+import { googleCallbackController} from "../controllers/auth.controller";
 
 const router = Router();
 
-// router.post("/signup", signupController);
-router.post("/login", loginController);
 // Step 1: Redirect user to Google
 router.get("/auth/google", (req, res) => {
   const params = new URLSearchParams({
