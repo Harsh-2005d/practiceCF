@@ -1,63 +1,73 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
+import { api } from "../axios";
 import "../profile.css";
+import axios from "axios";
 
-// Dummy data — replace with API data
-const ratingHistory = [
-  { date: "Jan 6", rating: 1010 },
-  { date: "Jan 8", rating: 1030 },
-  { date: "Jan 10", rating: 1036 },
-];
+type User = {
+  handle: string;
+  rank: string;
+  rating: number;
+  maxRank: string;
+  best: number;
+  email: string;
+};
 
-type user={
-    handle:string,
-    rank:string,
-    rating:number,
-    maxRank:string,
-    best:number,
-    email:string,
-    isLogged:boolean
-}
+export default function ProfilePage() {
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [handle, setHandle] = useState("");
 
-export default function ProfilePage(user:user) {
-  const [User, setUser] = useState<user>({
-  handle: "",
-  rank: "",
-  rating: 0,
-  maxRank: "",
-  best: 0,
-  email: "",
-  isLogged: false
-});
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const res = await api.get<User>("/api/auth/me");
+        setUser(res.data);
+        setHandle(res.data.handle ?? "");
+      } catch {
+        setUser(null);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const [handle,setHandle]=useState("")
+    fetchUser();
+  }, []);
 
-  const handleSubmit = (e) => {
+  if (loading) return <p>Loading profile...</p>;
+  if (!user) return <p>Not authenticated</p>;
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setUser({
-      ...user,
-      isLogged:true
-    });
+
+    try {
+      await api.post("/api/handle", {
+        handle,
+      });
+
+      setUser((prev) =>
+        prev
+          ? {
+              ...prev,
+              handle,
+            }
+          : prev
+      );
+    } catch (err) {
+      console.error("Failed to update handle", err);
+    }
   };
-  user = {
-    handle: "harsh_dahiya",
-    rank: "Newbie",
-    rating: 1036,
-    maxRank: "newbie",
-    best: 1573,
-    isLogged:false,
-    email: "dahiyaharsh2005@gmail.com",
-  };
+
 
   return (
     <div className="profile-page">
       <div className="profile-container">
 
-        {/* Profile Card */}
         <div className="profile-card">
           <div className="profile-info">
             <p className="rank">{user.rank}</p>
-            {user.isLogged ? (
+
+            {user.handle ? (
               <h1 className="handle">{user.handle}</h1>
             ) : (
               <form onSubmit={handleSubmit}>
@@ -75,13 +85,16 @@ export default function ProfilePage(user:user) {
             <div className="stats">
               <div className="stat">
                 <p className="label">Contest Rating</p>
-                <p className="value">{user.rating} <span className="muted">(max. {user.maxRank}, {user.rating})</span></p>
+                <p className="value">
+                  {user.rating} <span className="muted">(max. {user.maxRank})</span>
+                </p>
               </div>
+
               <div className="stat">
                 <p className="label">Best Performance</p>
                 <p className="value">{user.best}</p>
               </div>
-              
+
               <div className="stat">
                 <p className="label">Email</p>
                 <p className="value email">{user.email}</p>
@@ -90,22 +103,19 @@ export default function ProfilePage(user:user) {
           </div>
         </div>
 
-        {/* Graph Card */}
-        (
-          <div className="graph-card">
-            <h2 className="graph-title">Rating Progress</h2>
-            <div className="graph-wrapper">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={ratingHistory}>
-                  <XAxis dataKey="date" />
-                  <YAxis domain={[800, 2200]} />
-                  <Tooltip />
-                  <Line type="monotone" dataKey="rating" strokeWidth={2} dot />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
+        <div className="graph-card">
+          <h2 className="graph-title">Rating Progress</h2>
+          <div className="graph-wrapper">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={[]}>
+                <XAxis dataKey="date" />
+                <YAxis domain={[800, 2200]} />
+                <Tooltip />
+                <Line type="monotone" dataKey="rating" strokeWidth={2} dot />
+              </LineChart>
+            </ResponsiveContainer>
           </div>
-        )
+        </div>
 
       </div>
     </div>

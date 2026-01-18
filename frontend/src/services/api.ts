@@ -6,33 +6,26 @@ export type Solve = {
 };
 
 export type ReviseResponse = {
+  error?: string;
+  success?: boolean;
   previousDay: Solve[];
   previousWeek: Solve[];
   previousMonth: Solve[];
 };
 
-const BASE_URL = "http://localhost:3000/api";
-
-function getToken(): string | null {
-  return localStorage.getItem("token");
-}
+import { api } from "../axios";
 
 export async function getRevisionSolves(): Promise<ReviseResponse> {
-  const token = getToken();
+  try {
+    const res = await api.get<ReviseResponse>("/api/revise");
 
-  if (!token) {
-    throw new Error("Not authenticated");
+    if (res.data.error) {
+      throw new Error(res.data.error);
+    }
+
+    return res.data;
+  } catch (err) {
+    throw err;
   }
-
-  const res = await fetch(`${BASE_URL}/revise`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-
-  if (!res.ok) {
-    throw new Error("Failed to fetch revision solves");
-  }
-
-  return res.json();
 }
+
