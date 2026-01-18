@@ -1,17 +1,57 @@
-import { useState } from "react";
-import Navbar from "../components/Navbar";
+import { useEffect, useState } from "react";
+import { getRevisionSolves } from "../services/api";
+import type { Solve } from "../services/api";
+import "../styles/dashboard.css";
+
+// useEffect(() => {
+//   if (!localStorage.getItem("token")) {
+//     window.location.href = "/login";
+//   }
+// }, []);
+
 
 type TimeFilter = "yesterday" | "lastWeek" | "lastMonth";
 
 const Dashboard = () => {
   const [filter, setFilter] = useState<TimeFilter>("yesterday");
+  const [data, setData] = useState<{
+    yesterday: Solve[];
+    lastWeek: Solve[];
+    lastMonth: Solve[];
+  } | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    getRevisionSolves()
+      .then((res) => {
+        setData({
+          yesterday: res.previousDay,
+          lastWeek: res.previousWeek,
+          lastMonth: res.previousMonth,
+        });
+      })
+      .catch((err) => {
+        console.error(err);
+        setError("Failed to load solves. Are you logged in?");
+      })
+      .finally(() => setLoading(false));
+  }, []);
+
+  const solves = data ? data[filter] : [];
+
+  const title =
+    filter === "lastWeek"
+      ? "Last Week"
+      : filter === "lastMonth"
+      ? "Last Month"
+      : "Yesterday";
 
   return (
-    <div className="min-h-screen bg-gray-100">
-
-      <main className="max-w-7xl mx-auto px-6 py-8">
+    <div className="dashboard-root">
+      <main className="dashboard-container">
         {/* Filter Tabs */}
-        <div className="flex gap-3 bg-white p-2 rounded-xl shadow w-fit">
+        <div className="filter-tabs">
           <FilterButton
             label="Yesterday"
             active={filter === "yesterday"}
@@ -29,14 +69,20 @@ const Dashboard = () => {
           />
         </div>
 
-        {/* Content */}
-        <div className="mt-6 bg-white rounded-xl shadow p-6">
-          <QuestionsTable filter={filter} />
+        {/* Questions */}
+        <div className="questions-card">
+          {loading && <p>Loading solves...</p>}
+          {error && <p>{error}</p>}
+          {!loading && !error && (
+            <QuestionsTable solves={solves} title={title} />
+          )}
         </div>
       </main>
     </div>
   );
 };
+
+/* ---------- Filter Button ---------- */
 
 type FilterButtonProps = {
   label: string;
@@ -48,48 +94,44 @@ const FilterButton = ({ label, active, onClick }: FilterButtonProps) => {
   return (
     <button
       onClick={onClick}
-      className={`px-5 py-2 rounded-lg text-sm font-medium transition ${
-        active
-          ? "bg-blue-600 text-white shadow"
-          : "text-gray-600 hover:bg-gray-100"
-      }`}
+      className={`filter-button ${active ? "active" : ""}`}
     >
       {label}
     </button>
   );
 };
 
+/* ---------- Questions Table ---------- */
+
 type QuestionsTableProps = {
-  filter: TimeFilter;
+  solves: Solve[];
+  title: string;
 };
 
-const QuestionsTable = ({ filter }: QuestionsTableProps) => {
-  const data = {
-    yesterday: ["Question 1", "Question 2", "Question 3"],
-    lastWeek: ["Question 4", "Question 5", "Question 6"],
-    lastMonth: ["Question 7", "Question 8", "Question 9"],
-  };
+const QuestionsTable = ({ solves, title }: QuestionsTableProps) => {
+  if (solves.length === 0) {
+    return <p>No solves found.</p>;
+  }
 
   return (
     <div>
-      <h2 className="text-xl font-semibold text-gray-800 mb-4">
-        {filter === "lastWeek"
-          ? "Last Week"
-          : filter === "lastMonth"
-          ? "Last Month"
-          : "Yesterday"}
-      </h2>
+      <h2 className="questions-title">{title}</h2>
+      <ul className="questions-list">
+  {solves.map((s) => (
+    <li key={s.id} className="question-item">
+      <a
+        href={s.link}
+        target="_blank"
+        rel="noreferrer"
+        className="question-link"
+      >
+        {s.contestId}{s.index}
+      </a>
+      <div>{new Date(s.solvedAt).toLocaleString()}</div>
+    </li>
+  ))}
+</ul>
 
-      <ul className="space-y-3">
-        {data[filter].map((q) => (
-          <li
-            key={q}
-            className="border rounded-lg px-4 py-3 hover:bg-gray-50 transition"
-          >
-            {q}
-          </li>
-        ))}
-      </ul>
     </div>
   );
 };
