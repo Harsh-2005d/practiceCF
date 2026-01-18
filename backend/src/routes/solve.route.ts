@@ -5,4 +5,5 @@ const router = Router();
 
 router.get("/solves", getSolves);
 
+
 export default router;

@@ -5,6 +5,8 @@ import {prisma} from "../prismac"
 export const reviseController = async (req: AuthedRequest, res: Response) => {
   try {
     const { userId} = req.user!; // from JWT
+    // const userId = "332492f5-2627-4a1f-bc5a-a596a44973af";
+
 
     const user = await prisma.user.findUnique({
       where: { id: userId },
