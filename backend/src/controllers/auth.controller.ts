@@ -1,20 +1,24 @@
 import { Request, Response } from "express";
-import { signup, login } from "../services/auth.services";
 import { googleOAuthLogin } from "../services/oauth.services";
+
+const FRONTEND_URL = "http://localhost:5173"; // your Vite frontend
 
 export const googleCallbackController = async (req: Request, res: Response) => {
   try {
     const { code } = req.query;
 
     if (!code || typeof code !== "string") {
-      return res.status(400).json({ error: "Missing OAuth code" });
+      return res.status(400).send("Missing OAuth code");
     }
 
     const { user, token } = await googleOAuthLogin(code);
 
-    return res.status(200).json({ user, token });
-  } catch (err: any) {
-    return res.status(401).json({ error: err.message || "Google OAuth failed" });
+
+    return res.redirect(
+      `${FRONTEND_URL}/auth/finish?token=${token}`
+    );
+  } catch (err) {
+    console.error("Google OAuth error:", err);
+    return res.status(401).send("Google OAuth failed");
   }
 };
-

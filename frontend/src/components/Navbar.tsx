@@ -1,10 +1,23 @@
 import "../styles/navbar.css";
 import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
 
 const BACKEND_URL = "http://localhost:3000";
 
 const Navbar = () => {
-  const isLoggedIn = !!localStorage.getItem("token");
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    setIsLoggedIn(!!token);
+  }, []);
+
+  const logout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    setIsLoggedIn(false);
+    window.location.href = "/";
+  };
 
   return (
     <nav className="navbar">
@@ -25,15 +38,7 @@ const Navbar = () => {
               Sign in with Google
             </button>
           ) : (
-            <button
-              onClick={() => {
-                localStorage.removeItem("token");
-                localStorage.removeItem("user");
-                window.location.href = "/";
-              }}
-            >
-              Logout
-            </button>
+            <button onClick={logout}>Logout</button>
           )}
         </div>
       </div>

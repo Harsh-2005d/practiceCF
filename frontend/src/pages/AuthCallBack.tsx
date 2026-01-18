@@ -17,17 +17,24 @@ export default function AuthCallback() {
       }
 
       const res = await fetch(
-        `${BACKEND_URL}/auth/google/callback?code=${code}`
+        `${BACKEND_URL}/api/auth/google/callback?code=${code}`
       );
 
       const data = await res.json();
 
-      if (data.token) {
-        localStorage.setItem("token", data.token);
-        localStorage.setItem("user", JSON.stringify(data.user));
-        navigate("/");
-      } else {
+      if (!data.token) {
         navigate("/login");
+        return;
+      }
+
+      // store auth
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(data.user));
+
+      if (!data.user.handle) {
+        navigate("/set-handle");
+      } else {
+        navigate("/");
       }
     }
 

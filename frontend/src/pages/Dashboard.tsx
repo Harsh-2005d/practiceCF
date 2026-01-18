@@ -119,16 +119,21 @@ const QuestionsTable = ({ solves, title }: QuestionsTableProps) => {
       <ul className="questions-list">
   {solves.map((s) => (
     <li key={s.id} className="question-item">
-      <a
-        href={s.link}
-        target="_blank"
-        rel="noreferrer"
-        className="question-link"
-      >
+    <a
+      href={s.link}
+      target="_blank"
+      rel="noreferrer"
+      className="question-link"
+    >
+      <div className="question-code">
         {s.contestId}{s.index}
-      </a>
-      <div>{new Date(s.solvedAt).toLocaleString()}</div>
-    </li>
+      </div>
+      <div className="question-time">
+        {new Date(s.solvedAt).toLocaleString()}
+      </div>
+    </a>
+  </li>
+  
   ))}
 </ul>
 
