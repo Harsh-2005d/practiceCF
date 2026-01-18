@@ -1,22 +1,38 @@
 import "../styles/navbar.css";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { api } from "../axios";
 
-const BACKEND_URL = "http://localhost:3000";
+const BACKEND_URL = import.meta.env.VITE_BASE_URL;
 
 const Navbar = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    setIsLoggedIn(!!token);
+    const checkAuth = async () => {
+      try {
+        await api.get("/api/auth/me");
+        setIsLoggedIn(true);
+      } catch {
+        setIsLoggedIn(false);
+      }
+    };
+
+    checkAuth();
   }, []);
 
-  const logout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    setIsLoggedIn(false);
-    window.location.href = "/";
+  const logout = async () => {
+    try {
+      await api.post("/api/auth/logout");
+    } finally {
+      setIsLoggedIn(false);
+      navigate("/");
+    }
+  };
+
+  const loginWithGoogle = () => {
+    window.location.href = `${BACKEND_URL}/api/auth/google`;
   };
 
   return (
@@ -30,13 +46,7 @@ const Navbar = () => {
           {isLoggedIn && <Link to="/profile">Profile</Link>}
 
           {!isLoggedIn ? (
-            <button
-              onClick={() => {
-                window.location.href = `${BACKEND_URL}/api/auth/google`;
-              }}
-            >
-              Sign in with Google
-            </button>
+            <button onClick={loginWithGoogle}>Sign in with Google</button>
           ) : (
             <button onClick={logout}>Logout</button>
           )}

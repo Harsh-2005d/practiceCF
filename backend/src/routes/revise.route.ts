@@ -1,11 +1,11 @@
 import { Router } from "express";
-import { requireAuth } from "../middleware/auth.middleware";
+import { checkAuth } from "../middleware/auth.middleware";
 import { reviseController } from "../controllers/revise.controller";
 import { setHandleController } from "../controllers/setHandler.controller";
 const router = Router();
 
-router.post("/handle", requireAuth, setHandleController);
-router.get("/revise", requireAuth, reviseController);
+router.post("/handle", checkAuth, setHandleController);
+router.get("/revise", checkAuth, reviseController);
 
 
 export default router;

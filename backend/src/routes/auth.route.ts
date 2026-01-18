@@ -1,5 +1,6 @@
 import { Router } from "express";
-import { googleCallbackController} from "../controllers/auth.controller";
+import { googleCallbackController, logoutController, meController} from "../controllers/auth.controller";
+import { checkAuth, } from "../middleware/auth.middleware";
 
 const router = Router();
 
@@ -17,4 +18,7 @@ router.get("/auth/google", (req, res) => {
 
 // Step 2: Google redirects back here
 router.get("/auth/google/callback", googleCallbackController);
+
+router.get("/auth/me",checkAuth,meController);
+router.get("/auth/logout", logoutController);
 export default router;

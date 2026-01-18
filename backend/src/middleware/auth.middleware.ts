@@ -5,18 +5,17 @@ export interface AuthedRequest extends Request {
   user?: { userId: string; handle: string };
 }
 
-export const requireAuth = (
+
+export const checkAuth = (
   req: AuthedRequest,
   res: Response,
   next: NextFunction
 ) => {
-  const header = req.headers.authorization;
+  const token = req.cookies.token;
 
-  if (!header || !header.startsWith("Bearer ")) {
+  if (!token) {
     return res.status(401).json({ error: "Unauthorized" });
   }
-
-  const token = header.split(" ")[1];
 
   try {
     const payload = verifyToken(token);
