@@ -1,0 +1,10 @@
+/api base route
+    
+(protected)     /revise - returns 3 arrays of solves 
+(protected)     /handle - makes a post request to register the handle
+                
+                /auth 
+                    /google - activates google auth , redirects to dashboard
+                                return a cookie 
+                    /me- verifies the user is logged or not
+                    /logout- logs out the user
