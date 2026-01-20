@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { googleOAuthLogin } from "../services/oauth.services";
 import { AuthedRequest } from "../middleware/auth.middleware";
-const FRONTEND_URL = "http://localhost:5173"; // your Vite frontend
+ // your Vite frontend
 
 export const googleCallbackController = async (req: Request, res: Response) => {
   try {
@@ -20,7 +20,7 @@ export const googleCallbackController = async (req: Request, res: Response) => {
     });
     // console.log("Redirecting to:", FRONTEND_URL);
     return res.redirect(
-      `${FRONTEND_URL}/auth/finish`
+      `${process.env.Frontend_url}/auth/finish`
     );
   } catch (err) {
     console.error("Google OAuth error:", err);
