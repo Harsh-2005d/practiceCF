@@ -22,11 +22,11 @@ export interface CfProblem {
     problem: CfProblem;
   }
   
-export interface CfResponse<T> {
-    status: "OK" | "FAILED";
-    result: T;
-    comment?: string;
-  }
+// export interface CfResponse<T> {
+//     status: "OK" | "FAILED";
+//     result: T;
+//     comment?: string;
+//   }
   
 export interface CodeforcesResponse<T> {
   status: "OK" | "FAILED";
@@ -35,13 +35,13 @@ export interface CodeforcesResponse<T> {
 }
 
  export interface CodeforcesUser {
-  handle: string;
+  handle?: string;
   rating?: number;
   rank?: string;
   maxRating?: number;
   maxRank?: string;
-  contribution: number;
-  friendOfCount: number;
-  avatar: string;
-  titlePhoto: string;
+  contribution?: number;
+  friendOfCount?: number;
+  avatar?: string;
+  titlePhoto?: string;
 }

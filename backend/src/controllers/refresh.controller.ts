@@ -24,7 +24,8 @@ export const refreshController = async (req: AuthedRequest, res: Response) => {
     const cfRes = await fetch(
       `https://codeforces.com/api/user.info?handles=${user.handle}`
     );
-    const cfData = <CodeforcesResponse<CodeforcesUser>> await cfRes.json();
+
+    const cfData = (await cfRes.json()) as CodeforcesResponse<CodeforcesUser>;
 
     if (cfData.status !== "OK") {
       return res.status(400).json({ error: "Failed to fetch CF data" });

@@ -1,5 +1,5 @@
 import { prisma } from "../prismac";
-import { CfResponse, CfSubmission } from "../types/codeforces";
+import { CodeforcesResponse, CfSubmission } from "../types/codeforces";
 
 const PAGE_SIZE = 100;
 const MAX_PAGES = 10;     // hard safety cap
@@ -37,7 +37,7 @@ export async function syncLast30DaysSolves(
     if (!res.ok) break;
 
     const data =
-      (await res.json()) as CfResponse<CfSubmission[]>;
+      (await res.json()) as CodeforcesResponse<CfSubmission>;
 
     if (data.status !== "OK") break;
     if (data.result.length === 0) break;
@@ -107,7 +107,7 @@ export async function syncLast24HoursSolves(
     if (!res.ok) break;
 
     const data =
-      (await res.json()) as CfResponse<CfSubmission[]>;
+      (await res.json()) as CodeforcesResponse<CfSubmission>;
 
     if (data.status !== "OK") break;
     if (data.result.length === 0) break;
