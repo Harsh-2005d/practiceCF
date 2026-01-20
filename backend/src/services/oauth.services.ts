@@ -39,7 +39,7 @@ export const googleOAuthLogin = async (code: string) => {
   if (!googleUser.sub || !googleUser.email) {
     throw new Error("Invalid Google user data");
   }
-
+ 
   // 3. Find or create user in DB
   let user = await prisma.user.findUnique({
     where: { oauthId: googleUser.sub }
