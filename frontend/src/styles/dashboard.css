@@ -36,7 +36,7 @@
   }
   
   .filter-button.active {
-    background-color: #2563eb;
+    background-color: #000000;
     color: #ffffff;
     box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3);
   }
@@ -112,7 +112,7 @@
   }
   
   .filter-button.active {
-    background-color: #2563eb;
+    background-color: #030303;
     color: #ffffff;
     box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3);
   }
