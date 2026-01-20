@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import { api } from "../axios";
 import "../profile.css";
-import axios from "axios";
+
 
 type User = {
   handle: string;
