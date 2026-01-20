@@ -18,7 +18,7 @@ export interface CfProblem {
   
   export interface CfSubmission {
     creationTimeSeconds: number;
-    verdict?: string;
+    verdict?: string; 
     problem: CfProblem;
   }
   
@@ -30,7 +30,7 @@ export interface CfResponse<T> {
   
 export interface CodeforcesResponse<T> {
   status: "OK" | "FAILED";
-  result: T;
+  result: T[];
   comment?: string;
 }
 
