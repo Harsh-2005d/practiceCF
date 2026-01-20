@@ -10,6 +10,7 @@ interface AuthedRequest extends Request {
   };
 }
 import { CodeforcesUser,CodeforcesResponse } from "../types/codeforces";
+import { syncLast30DaysSolves } from "../services/cfSolveSync.service";
 
 export const refreshController = async (req: AuthedRequest, res: Response) => {
   try {
@@ -38,7 +39,7 @@ export const refreshController = async (req: AuthedRequest, res: Response) => {
         rating: cfUser.rating ?? null,
       },
     });
-
+    syncLast30DaysSolves
     return res.json({
       success: true,
       rating: updatedUser.rating,
