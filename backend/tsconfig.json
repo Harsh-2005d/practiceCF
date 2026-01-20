@@ -6,7 +6,7 @@
     "lib": ["esnext"],
     "esModuleInterop": true,
     "sourceMap": true,
-    "module": "ESNext",
+    "module": "commonjs",
     "moduleResolution": "node",
     "target": "ES2023",
     
