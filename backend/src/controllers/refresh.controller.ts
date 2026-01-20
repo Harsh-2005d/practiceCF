@@ -1,0 +1,54 @@
+import { Request, Response } from "express";
+import { prisma } from "../prismac";
+
+interface AuthedRequest extends Request {
+  user?: {
+    userId: string;
+    email: string;
+  };
+}
+import { CodeforcesUser,CodeforcesResponse } from "../types/codeforces";
+
+export const refreshController = async (req: AuthedRequest, res: Response) => {
+  try {
+    const userId = req.user?.userId;
+    if (!userId) return res.sendStatus(401);
+
+    // 1. Get user
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user || !user.handle) {
+      return res.status(400).json({ error: "Handle not set" });
+    }
+
+    // 2. Fetch CF info
+    const cfRes = await fetch(
+      `https://codeforces.com/api/user.info?handles=${user.handle}`
+    );
+    const cfData = <CodeforcesResponse<CodeforcesUser>> await cfRes.json();
+
+    if (cfData.status !== "OK") {
+      return res.status(400).json({ error: "Failed to fetch CF data" });
+    }
+
+    const cfUser = cfData.result;
+
+    // 3. Update DB (mainly rating)
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data: {
+        rating: cfUser.rating ?? null,
+      },
+    });
+
+    return res.json({
+      success: true,
+      rating: updatedUser.rating,
+    });
+  } catch (err) {
+    console.error("Refresh error:", err);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+};
