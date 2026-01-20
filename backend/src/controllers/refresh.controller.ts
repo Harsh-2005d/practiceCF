@@ -3,21 +3,17 @@ import { prisma } from "../prismac";
 
 interface AuthedRequest extends Request {
   user?: {
-    userId: string;
-    email: string;
+    userId: string;   // 👈 KEEP YOUR ORIGINAL NAME
+    handle?: string | null;
+    email?: string;
+    rating?: number | null;
   };
 }
 import { CodeforcesUser,CodeforcesResponse } from "../types/codeforces";
 
 export const refreshController = async (req: AuthedRequest, res: Response) => {
   try {
-    const userId = req.user?.userId;
-    if (!userId) return res.sendStatus(401);
-
-    // 1. Get user
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-    });
+    const user= req.user
 
     if (!user || !user.handle) {
       return res.status(400).json({ error: "Handle not set" });
@@ -37,7 +33,7 @@ export const refreshController = async (req: AuthedRequest, res: Response) => {
 
     // 3. Update DB (mainly rating)
     const updatedUser = await prisma.user.update({
-      where: { id: userId },
+      where: { id: user.userId },
       data: {
         rating: cfUser.rating ?? null,
       },
