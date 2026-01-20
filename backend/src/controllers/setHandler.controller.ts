@@ -8,7 +8,7 @@ export const setHandleController = async (
 ) => {
   try {
     const { handle } = req.body;
-    const { userId } = req.user!;
+    const  {userId}  = req.user!;
 
     if (!handle) {
       return res.status(400).json({ error: "Handle is required" });

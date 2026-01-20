@@ -3,6 +3,19 @@ import { getUserInfo } from "./codeforces";
 import { syncLast30DaysSolves } from "./cfSolveSync.service";
 
 export const setUserHandle = async (userId: string, handle: string) => {
+
+  const currentUser = await prisma.user.findUnique({
+    where: { id: userId },
+  });
+
+  if (!currentUser) {
+    throw new Error("User not found");
+  }
+
+  if (currentUser.handle) {
+    throw new Error("Handle already set and cannot be changed");
+  }
+  
   // 1. Verify CF handle exists
   const cfUser = await getUserInfo(handle);
   if (!cfUser) {
