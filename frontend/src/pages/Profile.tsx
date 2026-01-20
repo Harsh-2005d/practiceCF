@@ -78,7 +78,8 @@ export default function ProfilePage() {
                   onChange={(e) => setHandle(e.target.value)}
                   required
                 />
-                <button type="submit">Submit</button>
+                <button type="submit" className="submit-btn">Submit</button>
+
               </form>
             )}
 

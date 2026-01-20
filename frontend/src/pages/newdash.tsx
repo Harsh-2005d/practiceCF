@@ -29,7 +29,7 @@ export default function Dashboard () {
         });
       } catch (e) {
         console.error(e);
-        setError("Failed to load solves. Are you logged in?");
+        setError("Failed to load solves. Are you logged in? If yes, Enter your handle in profile section.");
       } finally {
         setLoading(false);
       }
