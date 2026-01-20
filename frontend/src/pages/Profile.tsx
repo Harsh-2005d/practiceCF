@@ -23,11 +23,13 @@ type HistogramResponse = {
 export default function ProfilePage() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+
+  // only used before handle is set
   const [handle, setHandle] = useState("");
 
   const [histogram, setHistogram] = useState<number[]>([]);
 
-  //Fetch user
+  // fetch user
   useEffect(() => {
     const fetchUser = async () => {
       try {
@@ -44,22 +46,34 @@ export default function ProfilePage() {
     fetchUser();
   }, []);
 
-  // 🔹 Fetch histogram
+  // fetch histogram
   useEffect(() => {
-    const fetchHistogram = async () => {
-      try {
-        const res = await api.get<HistogramResponse>(
-          "/api/stats/histogram",
-          { withCredentials: true }
-        );
-        setHistogram(res.data.data);
-      } catch (err) {
-        console.error("Failed to fetch histogram", err);
-      }
-    };
+  const cached = sessionStorage.getItem("histogram");
 
-    fetchHistogram();
-  }, []);
+  if (cached) {
+    setHistogram(JSON.parse(cached));
+    return;
+  }
+
+  const fetchHistogram = async () => {
+    try {
+      const res = await api.get<HistogramResponse>(
+        "/api/stats/histogram",
+        { withCredentials: true }
+      );
+      setHistogram(res.data.data);
+      sessionStorage.setItem(
+        "histogram",
+        JSON.stringify(res.data.data)
+      );
+    } catch (err) {
+      console.error("Failed to fetch histogram", err);
+    }
+  };
+
+  fetchHistogram();
+}, []);
+
 
   if (loading) return <p>Loading profile...</p>;
   if (!user) return <p>Not authenticated</p>;
@@ -69,13 +83,30 @@ export default function ProfilePage() {
     solved: count,
   }));
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  // submit handle ONCE
+  const handleSubmit = async () => {
     try {
       await api.post("/api/handle", { handle });
-      setUser((prev) => (prev ? { ...prev, handle } : prev));
+
+      // re-fetch user to lock handle permanently
+      const res = await api.get<User>("/api/auth/me");
+      setUser(res.data);
     } catch (err) {
-      console.error("Failed to update handle", err);
+      console.error("Failed to set handle", err);
+    }
+  };
+
+  // refresh rating / stats only
+  const refreshProfile = async () => {
+    try {
+      const res = await api.get<User>("/api/refresh/user");
+      setUser({
+        handle:user.handle,
+        rating:res.data.rating,
+        email:user.email,
+      });
+    } catch (err) {
+      console.error("Failed to refresh profile", err);
     }
   };
 
@@ -85,20 +116,33 @@ export default function ProfilePage() {
         <div className="profile-card">
           <div className="profile-info">
             {user.handle ? (
-              <h1 className="handle">{user.handle}</h1>
+              <div className="handle-row">
+                <h1 className="handle">{user.handle}</h1>
+                <button
+                  type="button"
+                  className="refresh-btn"
+                  onClick={refreshProfile}
+                >
+                  Refresh
+                </button>
+              </div>
             ) : (
-              <form onSubmit={handleSubmit}>
+              <div className="handle-input">
                 <input
                   type="text"
                   placeholder="Enter your handle"
                   value={handle}
                   onChange={(e) => setHandle(e.target.value)}
-                  required
                 />
-                <button type="submit" className="submit-btn">
+                <button
+                  type="button"
+                  className="submit-btn"
+                  onClick={handleSubmit}
+                  disabled={!handle.trim()}
+                >
                   Submit
                 </button>
-              </form>
+              </div>
             )}
 
             <div className="stats">

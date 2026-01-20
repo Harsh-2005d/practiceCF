@@ -29,7 +29,7 @@ export const refreshController = async (req: AuthedRequest, res: Response) => {
       return res.status(400).json({ error: "Failed to fetch CF data" });
     }
 
-    const cfUser = cfData.result;
+    const cfUser = cfData.result[0];
 
     // 3. Update DB (mainly rating)
     const updatedUser = await prisma.user.update({
@@ -42,6 +42,7 @@ export const refreshController = async (req: AuthedRequest, res: Response) => {
     return res.json({
       success: true,
       rating: updatedUser.rating,
+      handle: cfUser.handle
     });
   } catch (err) {
     console.error("Refresh error:", err);
