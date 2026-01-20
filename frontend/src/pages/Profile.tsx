@@ -61,11 +61,17 @@ export default function ProfilePage() {
         "/api/stats/histogram",
         { withCredentials: true }
       );
+
       setHistogram(res.data.data);
-      sessionStorage.setItem(
-        "histogram",
-        JSON.stringify(res.data.data)
-      );
+
+      // cache ONLY if data is meaningful
+      const hasAnySolve = res.data.data.some(v => v > 0);
+      if (hasAnySolve) {
+        sessionStorage.setItem(
+          "histogram",
+          JSON.stringify(res.data.data)
+        );
+      }
     } catch (err) {
       console.error("Failed to fetch histogram", err);
     }
@@ -74,6 +80,7 @@ export default function ProfilePage() {
   fetchHistogram();
 }, []);
 
+  // useEffect(() => { const fetchHistogram = async () => { try { const res = await api.get<HistogramResponse>("/api/stats/histogram", { withCredentials: true }); setHistogram(res.data.data); } catch (err) { console.error("Failed to fetch histogram", err); } }; fetchHistogram(); }, []);
 
   if (loading) return <p>Loading profile...</p>;
   if (!user) return <p>Not authenticated</p>;
@@ -101,9 +108,9 @@ export default function ProfilePage() {
     try {
       const res = await api.get<User>("/api/refresh/user");
       setUser({
-        handle:user.handle,
-        rating:res.data.rating,
-        email:user.email,
+        handle: user.handle,
+        rating: res.data.rating,
+        email: user.email,
       });
     } catch (err) {
       console.error("Failed to refresh profile", err);
