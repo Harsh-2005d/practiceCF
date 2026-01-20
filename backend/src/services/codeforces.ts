@@ -9,7 +9,7 @@ export async function getUserInfo(handle: string): Promise<CodeforcesUser> {
     throw new Error("Failed to reach Codeforces API");
   }
 
-  const data = (await res.json()) as CodeforcesResponse<CodeforcesUser[]>;
+  const data = (await res.json()) as CodeforcesResponse<CodeforcesUser>;
 
   if (data.status !== "OK") {
     throw new Error(data.comment || "Invalid Codeforces handle");
