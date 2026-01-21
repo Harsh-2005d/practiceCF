@@ -20,15 +20,36 @@ type HistogramResponse = {
   data: number[];
 };
 
+/*CF RANK LOGIC */
+
+function getCfRank(rating?: number | null) {
+  if (rating == null) return { title: "Unrated", color: "#999" };
+
+  if (rating >= 2900) return { title: "Legendary Grandmaster", color: "#ff0000" };
+  if (rating >= 2600) return { title: "International Grandmaster", color: "#ff0000" };
+  if (rating >= 2400) return { title: "Grandmaster", color: "#ff0000" };
+
+  if (rating >= 2300) return { title: "International Master", color: "#ff8c00" };
+  if (rating >= 2200) return { title: "Master", color: "#ff8c00" };
+
+  if (rating >= 1900) return { title: "Candidate Master", color: "#a0a" };
+
+  if (rating >= 1600) return { title: "Expert", color: "#0000ff" };
+  if (rating >= 1400) return { title: "Specialist", color: "#03a89e" };
+  if (rating >= 1200) return { title: "Pupil", color: "#008000" };
+
+  return { title: "Newbie", color: "#808080" };
+}
+
+/* COMPONENT */
+
 export default function ProfilePage() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [handle, setHandle] = useState("");
   const [histogram, setHistogram] = useState<number[]>([]);
 
-  // -------------------------
-  // Fetch logged-in user
-  // -------------------------
+  /* Fetch user */
   useEffect(() => {
     const fetchUser = async () => {
       try {
@@ -45,9 +66,7 @@ export default function ProfilePage() {
     fetchUser();
   }, []);
 
-  // -------------------------
-  // Fetch histogram AFTER handle exists
-  // -------------------------
+  /* Fetch histogram after handle exists  */
   useEffect(() => {
     if (!user?.handle) return;
 
@@ -59,7 +78,7 @@ export default function ProfilePage() {
         );
         setHistogram(res.data.data);
       } catch (err) {
-        console.error("Failed to fetch histogram", err);
+        console.error("Histogram fetch failed", err);
       }
     };
 
@@ -69,67 +88,69 @@ export default function ProfilePage() {
   if (loading) return <p>Loading profile...</p>;
   if (!user) return <p>Not authenticated</p>;
 
+  const rankInfo = getCfRank(user.rating);
+
   const histogramData = histogram.map((count, index) => ({
     day: `${30 - index}d`,
     solved: count,
   }));
 
-  // -------------------------
-  // Submit handle (ONCE)
-  // -------------------------
+  /* Submit handle (one time)  */
   const handleSubmit = async () => {
     try {
       await api.post("/api/handle", { handle });
 
-      // refetch user → triggers histogram useEffect
       const res = await api.get<User>("/api/auth/me");
       setUser(res.data);
-
-      // optional retry (CF sync delay safety)
-      setTimeout(async () => {
-        try {
-          const histRes = await api.get<HistogramResponse>(
-            "/api/stats/histogram",
-            { withCredentials: true }
-          );
-          setHistogram(histRes.data.data);
-        } catch {}
-      },3000);
     } catch (err) {
-      console.error("Failed to set handle", err);
+      console.error("Handle submit failed", err);
     }
   };
 
-  // Refresh rating only
+  /* Refresh rating */
   const refreshProfile = async () => {
     try {
-      const res = await api.get<User>("/api/refresh/user");
-      setUser({
-        handle: user.handle,
-        rating: res.data.rating,
-        email: user.email,
-      });
+      const res = await api.get<{ rating: number }>("/api/refresh/user");
+      setUser((prev) =>
+        prev ? { ...prev, rating: res.data.rating } : prev
+      );
     } catch (err) {
-      console.error("Failed to refresh profile", err);
+      console.error("Refresh failed", err);
     }
   };
 
   return (
     <div className="profile-page">
       <div className="profile-container">
+
+        {/* PROFILE CARD */}
         <div className="profile-card">
           <div className="profile-info">
+
             {user.handle ? (
-              <div className="handle-row">
-                <h1 className="handle">{user.handle}</h1>
-                <button
-                  type="button"
-                  className="refresh-btn"
-                  onClick={refreshProfile}
-                >
-                  Refresh
-                </button>
-              </div>
+<div className="handle-row">
+  <div>
+    <h1 className="handle" style={{ color: rankInfo.color }}>
+      {rankInfo.title === "Legendary Grandmaster" ? (
+        <>
+          <span style={{ color: "red" }}>{user.handle![0]}</span>
+          {user.handle!.slice(1)}
+        </>
+      ) : (
+        user.handle
+      )}
+    </h1>
+
+    <p className="rank" style={{ color: rankInfo.color }}>
+      {rankInfo.title}
+    </p>
+  </div>
+
+  <button className="refresh-btn" onClick={refreshProfile}>
+    Refresh
+  </button>
+</div>
+
             ) : (
               <div className="handle-row">
                 <input
@@ -140,7 +161,6 @@ export default function ProfilePage() {
                   onChange={(e) => setHandle(e.target.value)}
                 />
                 <button
-                  type="button"
                   className="submit-btn"
                   onClick={handleSubmit}
                   disabled={!handle.trim()}
@@ -152,7 +172,7 @@ export default function ProfilePage() {
 
             <div className="stats">
               <div className="stat">
-                <p className="label">Contest Rating</p>
+                <p className="label">Rating</p>
                 <p className="value">{user.rating ?? "-"}</p>
               </div>
 
@@ -164,6 +184,7 @@ export default function ProfilePage() {
           </div>
         </div>
 
+        {/* HISTOGRAM */}
         <div className="graph-card">
           <h2 className="graph-title">
             Problems Solved (Last 30 Days)
@@ -175,11 +196,16 @@ export default function ProfilePage() {
                 <XAxis dataKey="day" hide />
                 <YAxis allowDecimals={false} />
                 <Tooltip />
-                <Bar dataKey="solved" radius={[4, 4, 0, 0]} />
+                <Bar
+                  dataKey="solved"
+                  fill={rankInfo.color}
+                  radius={[4, 4, 0, 0]}
+                />
               </BarChart>
             </ResponsiveContainer>
           </div>
         </div>
+
       </div>
     </div>
   );

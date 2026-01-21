@@ -74,13 +74,22 @@ export default function Dashboard() {
         </div>
 
         <div className="questions-card">
-          {loading && <p>Loading solves...</p>}
-          {error && <p>{error}</p>}
+  <h2 className="questions-title">{title}</h2>
 
-          {!loading && !error && (
-            <QuestionsTable solves={solves} title={title} />
-          )}
-        </div>
+  {loading && <p className="status-text">Loading solves...</p>}
+  {error && <p className="status-text error">{error}</p>}
+
+  {!loading && !error && solves.length === 0 && (
+    <p className="empty-text">
+      No problems solved in this period.
+    </p>
+  )}
+
+  {!loading && !error && solves.length > 0 && (
+    <QuestionsTable solves={solves} title={""} />
+  )}
+</div>
+
       </main>
     </div>
   );
