@@ -36,11 +36,10 @@ export const QuestionsTable = ({ solves, title }: QuestionsTableProps) => {
               className="question-link"
             >
               <div className="question-code">
-                {s.contestId}
-                {s.index}
+                {s.problemName}
               </div>
               <div className="question-time">
-                {new Date(s.solvedAt).toLocaleString()}
+                {/* {new Date(s.solvedAt).toLocaleString()} */}
               </div>
             </a>
           </li>

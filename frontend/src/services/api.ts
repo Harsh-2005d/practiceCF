@@ -1,6 +1,7 @@
 export type Solve = {
   contestId: number;
   index: string;
+  problemName: string;
   link: string;
   solvedAt: string;
 };

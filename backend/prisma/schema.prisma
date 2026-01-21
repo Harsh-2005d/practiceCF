@@ -12,6 +12,7 @@ model Solve {
   userId    String
   contestId Int
   index     String
+  problemName String?
   link      String
   solvedAt  DateTime
   User      User     @relation(fields: [userId], references: [id])
