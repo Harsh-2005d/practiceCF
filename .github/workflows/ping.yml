@@ -1,0 +1,16 @@
+name: Periodic GET Ping
+
+on:
+  schedule:
+    - cron: "30 18 * * *"  # 18:30 UTC
+  workflow_dispatch:      # allows manual trigger from GitHub UI
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send GET request
+        run: |
+          curl -X POST \
+            -H "cron-secret: ${{ secrets.CRON_SECRET }}" \
+            https://practicecf.onrender.com/api/sync
