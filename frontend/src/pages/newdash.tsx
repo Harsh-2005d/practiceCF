@@ -57,12 +57,12 @@ export default function Dashboard () {
             onClick={() => setFilter("yesterday")}
           />
           <FilterButton
-            label="Last Week"
+            label="7 days ago"
             active={filter === "lastWeek"}
             onClick={() => setFilter("lastWeek")}
           />
           <FilterButton
-            label="Last Month"
+            label="30 days ago"
             active={filter === "lastMonth"}
             onClick={() => setFilter("lastMonth")}
           />
