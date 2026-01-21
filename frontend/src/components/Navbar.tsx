@@ -23,12 +23,20 @@ const Navbar = () => {
 
   const logout = async () => {
     try {
-      await api.post("api/auth/logout");
+      await api.get("/api/auth/logout");
+    } catch (err) {
+      console.error("Logout failed:", err);
     } finally {
+      localStorage.clear();
+      sessionStorage.clear();
+  
       setIsLoggedIn(false);
-      navigate("/");
+      navigate("/", { replace: true });
+
+      window.location.replace("/");
     }
   };
+  
 
   const loginWithGoogle = () => {
   window.location.href = new URL(

@@ -35,8 +35,8 @@ export const meController = (req: AuthedRequest, res: Response) => {
 export const logoutController = (_req: AuthedRequest, res: Response) => {
   res.clearCookie("token", {
     httpOnly: true,
-    sameSite: "lax",
-    secure: false, // true in prod
+    sameSite: "none",
+    secure: true, // true in prod
   });
   return res.sendStatus(200);
 };
