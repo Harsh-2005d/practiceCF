@@ -20,7 +20,7 @@ export const googleCallbackController = async (req: Request, res: Response) => {
     });
     // console.log("Redirecting to:", FRONTEND_URL);
     return res.redirect(
-      `${process.env.FRONTEND_URL}/auth/finish`
+      new URL("/auth/finish", process.env.FRONTEND_URL!).toString()
     );
   } catch (err) {
     console.error("Google OAuth error:", err);

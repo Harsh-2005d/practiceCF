@@ -3,7 +3,6 @@ import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { api } from "../axios";
 
-const BACKEND_URL = import.meta.env.VITE_BASE_URL;
 
 const Navbar = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -12,7 +11,7 @@ const Navbar = () => {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        await api.get("/api/auth/me");
+        await api.get("api/auth/me");
         setIsLoggedIn(true);
       } catch {
         setIsLoggedIn(false);
@@ -24,7 +23,7 @@ const Navbar = () => {
 
   const logout = async () => {
     try {
-      await api.post("/api/auth/logout");
+      await api.post("api/auth/logout");
     } finally {
       setIsLoggedIn(false);
       navigate("/");
@@ -32,8 +31,11 @@ const Navbar = () => {
   };
 
   const loginWithGoogle = () => {
-    window.location.href = `${BACKEND_URL}/api/auth/google`;
-  };
+  window.location.href = new URL(
+    "/api/auth/google",
+    import.meta.env.VITE_BASE_URL
+  ).toString();
+};
 
   return (
     <nav className="navbar">
