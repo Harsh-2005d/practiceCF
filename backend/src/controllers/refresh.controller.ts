@@ -10,7 +10,8 @@ interface AuthedRequest extends Request {
   };
 }
 import { CodeforcesUser,CodeforcesResponse } from "../types/codeforces";
-import { syncLast30DaysSolves } from "../services/cfSolveSync.service";
+import { syncLast24HoursSolves, syncLast30DaysSolves } from "../services/cfSolveSync.service";
+import { runDailyCfSyncJob } from "../jobs/dailySync.job";
 
 export const refreshController = async (req: AuthedRequest, res: Response) => {
   try {
@@ -51,3 +52,13 @@ export const refreshController = async (req: AuthedRequest, res: Response) => {
     return res.status(500).json({ error: "Internal server error" });
   }
 };
+
+export const syncController= async (req:AuthedRequest,res:Response)=>{
+  try{
+    runDailyCfSyncJob
+  }
+  catch(err){
+    console.error("Sync error:", err);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+}
