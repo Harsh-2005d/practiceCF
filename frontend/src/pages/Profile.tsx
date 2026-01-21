@@ -130,7 +130,16 @@ export default function ProfilePage() {
             {user.handle ? (
 <div className="handle-row">
   <div>
-    <h1 className="handle" style={{ color: rankInfo.color }}>
+    <h1 className="handle">
+    <a
+      href={`https://codeforces.com/profile/${user.handle}`}
+      target="_blank"
+      rel="noopener noreferrer"
+      style={{
+        color: rankInfo.color,
+        textDecoration: "none",
+      }}
+    >
       {rankInfo.title === "Legendary Grandmaster" ? (
         <>
           <span style={{ color: "red" }}>{user.handle![0]}</span>
@@ -139,6 +148,7 @@ export default function ProfilePage() {
       ) : (
         user.handle
       )}
+    </a>
     </h1>
 
     <p className="rank" style={{ color: rankInfo.color }}>

@@ -23,6 +23,7 @@ export async function syncLast30DaysSolves(
     userId: string;
     contestId: number;
     index: string;
+    problemName: string | null;
     link: string;
     solvedAt: Date;
   }[] = [];
@@ -60,6 +61,7 @@ export async function syncLast30DaysSolves(
         userId,
         contestId: s.problem.contestId,
         index: s.problem.index,
+        problemName: s.problem.name ?? null,
         link: `https://codeforces.com/problemset/problem/${s.problem.contestId}/${s.problem.index}`,
         solvedAt: new Date(s.creationTimeSeconds * 1000)
       });
