@@ -15,8 +15,8 @@ export const googleCallbackController = async (req: Request, res: Response) => {
     // console.log("redirecting");
     res.cookie("token", token, {
       httpOnly: true,
-      secure: false, // true in prod (https)
-      sameSite: "lax",
+      secure: true, // true in prod (https)
+      sameSite: "none",
     });
     // console.log("Redirecting to:", FRONTEND_URL);
     return res.redirect(
