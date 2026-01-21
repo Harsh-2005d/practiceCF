@@ -23,13 +23,12 @@ type HistogramResponse = {
 export default function ProfilePage() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-
-  // only used before handle is set
   const [handle, setHandle] = useState("");
-
   const [histogram, setHistogram] = useState<number[]>([]);
 
-  // fetch user
+  // -------------------------
+  // Fetch logged-in user
+  // -------------------------
   useEffect(() => {
     const fetchUser = async () => {
       try {
@@ -46,41 +45,26 @@ export default function ProfilePage() {
     fetchUser();
   }, []);
 
-  // fetch histogram
+  // -------------------------
+  // Fetch histogram AFTER handle exists
+  // -------------------------
   useEffect(() => {
-  const cached = sessionStorage.getItem("histogram");
+    if (!user?.handle) return;
 
-  if (cached) {
-    setHistogram(JSON.parse(cached));
-    return;
-  }
-
-  const fetchHistogram = async () => {
-    try {
-      const res = await api.get<HistogramResponse>(
-        "/api/stats/histogram",
-        { withCredentials: true }
-      );
-
-      setHistogram(res.data.data);
-
-      // cache ONLY if data is meaningful
-      const hasAnySolve = res.data.data.some(v => v > 0);
-      if (hasAnySolve) {
-        sessionStorage.setItem(
-          "histogram",
-          JSON.stringify(res.data.data)
+    const fetchHistogram = async () => {
+      try {
+        const res = await api.get<HistogramResponse>(
+          "/api/stats/histogram",
+          { withCredentials: true }
         );
+        setHistogram(res.data.data);
+      } catch (err) {
+        console.error("Failed to fetch histogram", err);
       }
-    } catch (err) {
-      console.error("Failed to fetch histogram", err);
-    }
-  };
+    };
 
-  fetchHistogram();
-}, []);
-
-  // useEffect(() => { const fetchHistogram = async () => { try { const res = await api.get<HistogramResponse>("/api/stats/histogram", { withCredentials: true }); setHistogram(res.data.data); } catch (err) { console.error("Failed to fetch histogram", err); } }; fetchHistogram(); }, []);
+    fetchHistogram();
+  }, [user?.handle]);
 
   if (loading) return <p>Loading profile...</p>;
   if (!user) return <p>Not authenticated</p>;
@@ -90,20 +74,33 @@ export default function ProfilePage() {
     solved: count,
   }));
 
-  // submit handle ONCE
+  // -------------------------
+  // Submit handle (ONCE)
+  // -------------------------
   const handleSubmit = async () => {
     try {
       await api.post("/api/handle", { handle });
 
-      // re-fetch user to lock handle permanently
+      // refetch user → triggers histogram useEffect
       const res = await api.get<User>("/api/auth/me");
       setUser(res.data);
+
+      // optional retry (CF sync delay safety)
+      setTimeout(async () => {
+        try {
+          const histRes = await api.get<HistogramResponse>(
+            "/api/stats/histogram",
+            { withCredentials: true }
+          );
+          setHistogram(histRes.data.data);
+        } catch {}
+      },3000);
     } catch (err) {
       console.error("Failed to set handle", err);
     }
   };
 
-  // refresh rating / stats only
+  // Refresh rating only
   const refreshProfile = async () => {
     try {
       const res = await api.get<User>("/api/refresh/user");
@@ -134,9 +131,10 @@ export default function ProfilePage() {
                 </button>
               </div>
             ) : (
-              <div className="handle-input">
+              <div className="handle-row">
                 <input
                   type="text"
+                  className="handle-input"
                   placeholder="Enter your handle"
                   value={handle}
                   onChange={(e) => setHandle(e.target.value)}

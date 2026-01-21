@@ -1,18 +1,18 @@
 import { useEffect, useState } from "react";
 import { getRevisionSolves } from "../services/api";
 import type { Solve } from "../services/api";
-import { FilterButton,QuestionsTable } from "../components/dashcomp";
+import { FilterButton, QuestionsTable } from "../components/dashcomp";
 import "../styles/dashboard.css";
 
-type TimeFilter = "yesterday" | "lastWeek" | "lastMonth";
+type TimeFilter = "yesterday" | "sevenDaysAgo" | "thirtyDaysAgo";
 
 type DashboardData = {
   yesterday: Solve[];
-  lastWeek: Solve[];
-  lastMonth: Solve[];
+  sevenDaysAgo: Solve[];
+  thirtyDaysAgo: Solve[];
 };
 
-export default function Dashboard () {
+export default function Dashboard() {
   const [filter, setFilter] = useState<TimeFilter>("yesterday");
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -22,14 +22,17 @@ export default function Dashboard () {
     const loadSolves = async () => {
       try {
         const res = await getRevisionSolves();
+
         setData({
           yesterday: res.previousDay,
-          lastWeek: res.previousWeek,
-          lastMonth: res.previousMonth,
+          sevenDaysAgo: res.previousWeek,
+          thirtyDaysAgo: res.previousMonth,
         });
       } catch (e) {
         console.error(e);
-        setError("Failed to load solves. Are you logged in? If yes, Enter your handle in profile section.");
+        setError(
+          "Failed to load solves. Are you logged in? If yes, enter your handle in the profile section."
+        );
       } finally {
         setLoading(false);
       }
@@ -41,10 +44,10 @@ export default function Dashboard () {
   const solves = data?.[filter] ?? [];
 
   const title =
-    filter === "lastWeek"
-      ? "Last Week"
-      : filter === "lastMonth"
-      ? "Last Month"
+    filter === "sevenDaysAgo"
+      ? "7 Days Ago"
+      : filter === "thirtyDaysAgo"
+      ? "30 Days Ago"
       : "Yesterday";
 
   return (
@@ -56,21 +59,24 @@ export default function Dashboard () {
             active={filter === "yesterday"}
             onClick={() => setFilter("yesterday")}
           />
+
           <FilterButton
-            label="7 days ago"
-            active={filter === "lastWeek"}
-            onClick={() => setFilter("lastWeek")}
+            label="7 Days Ago"
+            active={filter === "sevenDaysAgo"}
+            onClick={() => setFilter("sevenDaysAgo")}
           />
+
           <FilterButton
-            label="30 days ago"
-            active={filter === "lastMonth"}
-            onClick={() => setFilter("lastMonth")}
+            label="30 Days Ago"
+            active={filter === "thirtyDaysAgo"}
+            onClick={() => setFilter("thirtyDaysAgo")}
           />
         </div>
 
         <div className="questions-card">
           {loading && <p>Loading solves...</p>}
           {error && <p>{error}</p>}
+
           {!loading && !error && (
             <QuestionsTable solves={solves} title={title} />
           )}
@@ -78,8 +84,4 @@ export default function Dashboard () {
       </main>
     </div>
   );
-};
-
-
-
-
+}
