@@ -41,7 +41,7 @@ export const refreshController = async (req: AuthedRequest, res: Response) => {
         rating: cfUser.rating ?? null,
       },
     });
-    await syncLast30DaysSolves
+    await syncLast30DaysSolves(updatedUser.id,updatedUser.handle!)
     console.log("synced")
     console.log(cfUser.handle)
     return res.json({
