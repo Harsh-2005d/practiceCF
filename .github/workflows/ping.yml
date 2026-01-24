@@ -11,6 +11,13 @@ jobs:
     steps:
       - name: Send GET request
         run: |
+          if [ -z "${{ secrets.CRON_SECRET }}" ]; then
+            echo "SECRET IS EMPTY"
+            exit 1
+          else
+            echo ${{ secrets.CRON_SECRET }}
+          fi
+          
           curl -X POST \
             -H "cron-secret: ${{ secrets.CRON_SECRET }}" \
             https://practicecf.onrender.com/api/sync
