@@ -13,6 +13,8 @@ router.get("/stats/histogram", checkAuth, histogramController);
 router.get("/refresh/user", checkAuth, refreshController);
 router.post("/sync", async (req, res) => {
   console.log("recieved")
+  console.log(req.headers["cron-secret"] )
+  console.log(process.env.CRON_SECRET)
   if (req.headers["cron-secret"] !== process.env.CRON_SECRET) {
     return res.status(401).end();
   }
@@ -25,5 +27,6 @@ router.post("/sync", async (req, res) => {
 router.get("/health", (_req, res) => {
   res.status(200).json({ status: "ok" });
 });
+
 
 export default router;

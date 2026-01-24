@@ -13,4 +13,4 @@ jobs:
         run: |
           curl -X POST \
             -H "cron-secret: ${{ secrets.CRON_SECRET }}" \
-            http://localhost:3000/api/sync
+            https://practicecf.onrender.com/api/sync
