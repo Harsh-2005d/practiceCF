@@ -1,239 +1,174 @@
+# PracticeCF
 
----
+A production-oriented full-stack application that helps competitive programmers retain problem-solving techniques through spaced repetition.
 
-# Codeforces Revision Tracker
-
-[![Contributors][contributors-shield]][contributors-url]
-[![Forks][forks-shield]][forks-url]
-[![Stargazers][stars-shield]][stars-url]
-[![Issues][issues-shield]][issues-url]
-[![License][license-shield]][license-url]
-[![LinkedIn][linkedin-shield]][linkedin-url]
-
-A full-stack web application that helps you **systematically revise Codeforces problems** using spaced repetition (1-day, 7-day, and 30-day lookbacks).
-
-**Tech Stack:** React, Express, PostgreSQL, Google OAuth
-**Goal:** Turn random problem solving into structured long-term retention.
-
----
+PracticeCF automatically synchronizes solved Codeforces problems, organizes them into structured revision windows (1-day, 7-day, and 30-day), and provides a dashboard for long-term practice. The project focuses not only on solving the user problem but also on demonstrating modern backend engineering practices such as authentication, API design, caching, asynchronous processing, and service reliability.
 
 ## Table of Contents
 
-* [About The Project](#about-the-project)
+* [Why PracticeCF?](#why-practicecf)
+* [Features](#features)
+* [Architecture](#architecture)
+* [Tech Stack](#tech-stack)
 
-  * [Built With](#built-with)
-* [Getting Started](#getting-started)
+  * [Frontend](#frontend)
+  * [Backend](#backend)
+  * [Authentication](#authentication)
+  * [Infrastructure](#infrastructure)
+* [Engineering Highlights](#engineering-highlights)
 
-  * [Prerequisites](#prerequisites)
-  * [Installation](#installation)
-* [Usage](#usage)
-* [Roadmap](#roadmap)
-* [Contributing](#contributing)
+  * [Authentication](#authentication-1)
+  * [API Layer](#api-layer)
+  * [Background Processing](#background-processing)
+  * [Caching](#caching)
+  * [Reliability](#reliability)
+  * [Database Design](#database-design)
+* [Running Locally](#running-locally)
+* [Future Improvements](#future-improvements)
+* [Lessons Learned](#lessons-learned)
 * [License](#license)
-* [Contact](#contact)
-* [Acknowledgments](#acknowledgments)
+* [Acknowlegements](#acknowledgments)
 
----
+## Why PracticeCF?
 
-## About The Project
+Competitive programmers often solve hundreds of problems but rarely revisit them, causing algorithms and techniques to be forgotten over time.
 
-![Product Screenshot][product-screenshot]
+PracticeCF automates this process by continuously syncing submissions from Codeforces and scheduling problems for revision using spaced repetition.
 
-This project is built to solve a common competitive programming issue:
-**you solve problems, but you don’t actually retain them.**
 
-The Codeforces Revision Tracker automatically syncs your solved problems and organizes them into revision windows:
+# Features
 
-* **1-day**
-* **7-day**
-* **30-day**
+* Google OAuth authentication
+* Automatic synchronization of Codeforces submissions
+* Spaced repetition revision scheduler
+* Revision dashboard with 1-day, 7-day, and 30-day review queues
+* Persistent PostgreSQL storage with Prisma ORM
+* RESTful API architecture
+* Redis caching for frequently accessed Codeforces data
+* Background job processing for asynchronous synchronization
+* Rate limiting to protect public APIs
+* Centralized error handling and request validation
+* Structured logging for easier debugging
 
-This enforces spaced repetition, helping you remember techniques, patterns, and edge cases instead of forgetting them after one submission.
+# Architecture
 
-### Key Features
-
-* Automatic daily sync of solved problems from Codeforces
-* Secure authentication using **Google OAuth**
-* Structured revision buckets (1 / 7 / 30 days)
-* Persistent storage using **PostgreSQL**
-* Modular Express backend
-* Clean React frontend
-
----
-
-## Built With
-
-* **React** – Frontend UI
-* **Node.js** – Runtime
-* **Express** – Backend framework
-* **PostgreSQL** – Relational database
-* **Google OAuth** – Authentication
-
----
-
-## Getting Started
-
-Follow these steps to run the project locally.
-
----
-
-### Prerequisites
-
-Make sure you have the following installed:
-
-* **Node.js** (v18+ recommended)
-* **npm**
-* **PostgreSQL**
-* A **Google OAuth Client ID**
-* A **Codeforces handle**
-
-Update npm:
-
-```sh
-npm install npm@latest -g
+```
+                +----------------------+
+                |      React SPA       |
+                +----------+-----------+
+                           |
+                           |
+                   API Gateway / BFF
+                           |
+      +--------------------+-------------------+
+      |                    |                   |
+ Authentication      Revision Service     Sync Service
+      |                    |                   |
+      |                    |           BullMQ Worker
+      |                    |                   |
+      +--------------------+-------------------+
+                           |
+                    PostgreSQL (Prisma)
+                           |
+                        Redis Cache
+                           |
+                    Codeforces API
 ```
 
----
 
-### Installation
+# Tech Stack
 
-1. **Clone the repository**
+### Frontend
 
-```sh
-git clone https://github.com/Harsh-2005d/practiceCF.git
-```
+* React
+* Tailwind CSS
 
-2. **Navigate into the project**
+### Backend
 
-```sh
+* Node.js
+* Express
+* Prisma ORM
+* PostgreSQL
+* Redis
+* BullMQ
+
+### Authentication
+
+* Google OAuth
+
+### Infrastructure
+
+* GitHub Actions
+
+
+# Engineering Highlights
+
+### Authentication
+
+Implemented secure Google OAuth login with authenticated sessions and protected API routes.
+
+### API Layer
+
+Designed modular REST APIs with separation between authentication, synchronization, and revision services.
+
+### Background Processing
+
+Submission synchronization runs asynchronously through background workers, preventing long-running external API calls from blocking user requests.
+
+### Caching
+
+Redis is used to cache frequently requested Codeforces responses, reducing redundant API calls and improving response times.
+
+### Reliability
+
+Implemented rate limiting, centralized error handling, request validation, and structured logging to improve robustness and simplify debugging.
+
+### Database Design
+
+Modeled users, submissions, and revision schedules using Prisma ORM with PostgreSQL.
+
+
+# Future Improvements
+
+* WebSocket notifications for completed synchronization
+* Revision streaks and analytics
+* Personalized notes per problem
+* Problem tagging and filtering
+* Email reminders
+* OpenAPI/Swagger documentation
+* Kubernetes deployment
+* Prometheus and Grafana monitoring
+
+
+# Running Locally
+
+```bash
+git clone https://github.com/Harsh-2005d/practiceCF
+
 cd practiceCF
+
 ```
 
-3. **Install dependencies**
+Create a `.env` file with the required database, OAuth, Redis, and session configuration before starting the application.
 
-```sh
-npm install
-```
 
-4. **Create a `.env` file** in the backend directory
+# Lessons Learned
 
-```env
-DATABASE_URL=postgresql://user:password@localhost:5432/dbname
-GOOGLE_CLIENT_ID=your_google_client_id
-GOOGLE_CLIENT_SECRET=your_google_client_secret
-SESSION_SECRET=your_secret
-```
+This project evolved from a simple revision tracker into a backend-focused application exploring authentication, asynchronous processing, caching, API design, and building reliable services that interact with third-party APIs.
 
-5. **Run database migrations**
 
-```sh
-npx prisma migrate dev
-```
-
-6. **Start the development server**
-
-```sh
-npm run dev
-```
-
----
-
-## Usage
-
-1. Sign in using **Google OAuth**.
-2. Link your **Codeforces handle**.
-3. The system automatically syncs your solved problems daily.
-4. Open the revision dashboard to see:
-
-   * Problems solved **yesterday**
-   * Problems solved **7 days ago**
-   * Problems solved **30 days ago**
-5. Revisit and practice from your revision queue.
-
-This workflow encourages **systematic review instead of one-time problem solving**.
-
----
-
-## Roadmap
-
-* [ ] Real-time Codeforces API syncing
-* [ ] Difficulty filters and problem tagging
-* [ ] Personal notes per problem
-* [ ] Revision streaks and analytics dashboard
-* [ ] Mobile-first UI improvements
-* [ ] Exportable revision sets
-
-See the [open issues](https://github.com/Harsh-2005d/practiceCF/issues) for a full list.
-
----
-
-## Contributing
-
-Contributions are welcome.
-
-If you want to improve the project:
-
-1. Fork the repository
-2. Create your branch
-
-```sh
-git checkout -b feature/AmazingFeature
-```
-
-3. Commit your changes
-
-```sh
-git commit -m "Add some AmazingFeature"
-```
-
-4. Push to your branch
-
-```sh
-git push origin feature/AmazingFeature
-```
-
-5. Open a Pull Request
-
----
 
 ## License
 
 Distributed under the **project_license**. See `LICENSE.txt` for more information.
 
----
 
 ## Contact
 
 Harsh Dahiya
-Twitter: [@twitter_handle](https://twitter.com/twitter_handle)
-Email: [email@email_client.com](mailto:email@email_client.com)
+- Email: [dahiyaharsh2005@gmail.com](mailto:dahiyaharsh2005@gmail.com)
 
-Project Link: [https://github.com/Harsh-2005d/practiceCF](https://github.com/Harsh-2005d/practiceCF)
-
----
 
 ## Acknowledgments
 
-* Codeforces for the platform and API
-* Google OAuth for authentication
-* The open-source community
-
----
-
-## References
-
-[contributors-shield]: https://img.shields.io/github/contributors/Harsh-2005d/practiceCF.svg?style=for-the-badge
-[contributors-url]: https://github.com/Harsh-2005d/practiceCF/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/Harsh-2005d/practiceCF.svg?style=for-the-badge
-[forks-url]: https://github.com/Harsh-2005d/practiceCF/network/members
-[stars-shield]: https://img.shields.io/github/stars/Harsh-2005d/practiceCF.svg?style=for-the-badge
-[stars-url]: https://github.com/Harsh-2005d/practiceCF/stargazers
-[issues-shield]: https://img.shields.io/github/issues/Harsh-2005d/practiceCF.svg?style=for-the-badge
-[issues-url]: https://github.com/Harsh-2005d/practiceCF/issues
-[license-shield]: https://img.shields.io/github/license/Harsh-2005d/practiceCF.svg?style=for-the-badge
-[license-url]: https://github.com/Harsh-2005d/practiceCF/blob/master/LICENSE.txt
-[linkedin-shield]: https://img.shields.io/badge/LinkedIn-black.svg?style=for-the-badge&logo=linkedin
-[linkedin-url]: https://linkedin.com/in/linkedin_username
-[product-screenshot]: images/screenshot.png
-
----
+* Codeforces for the API

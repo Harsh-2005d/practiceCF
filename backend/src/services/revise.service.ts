@@ -49,7 +49,7 @@ export const getRevisionSolves = async (userId: string) => {
     weekBack: [wStart.toISOString(), wEnd.toISOString()],
     monthBack: [mStart.toISOString(), mEnd.toISOString()]
   });
-
+  
   const [previousDay, previousWeek, previousMonth] = await Promise.all([
     prisma.solve.findMany({
       where: { userId, solvedAt: { gte: yStart, lt: yEnd } },
