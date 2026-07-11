@@ -6,6 +6,7 @@ const router = Router();
 
 // Step 1: Redirect user to Google
 router.get("/auth/google", (req, res) => {
+
   const params = new URLSearchParams({
     client_id: process.env.GOOGLE_CLIENT_ID!,
     redirect_uri: process.env.GOOGLE_REDIRECT_URL!,

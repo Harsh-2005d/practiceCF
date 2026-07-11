@@ -35,12 +35,17 @@ export const refreshController = async (req: AuthedRequest, res: Response) => {
     const cfUser = cfData.result[0];
 
     // 3. Update DB (mainly rating)
-    const updatedUser = await prisma.user.update({
-      where: { id: user.userId },
-      data: {
-        rating: cfUser.rating ?? null,
-      },
-    });
+    const result = await prisma.query(
+  `
+  UPDATE "User"
+  SET rating = $1
+  WHERE id = $2
+  RETURNING *
+  `,
+  [cfUser.rating ?? null, user.userId]
+);
+
+const updatedUser = result.rows[0];
     await syncLast30DaysSolves(updatedUser.id,updatedUser.handle!)
     console.log("synced")
     console.log(cfUser.handle)

@@ -48,20 +48,48 @@ export const getRevisionSolves = async (userId: string) => {
     monthBack: [mStart.toISOString(), mEnd.toISOString()]
   });
 
-  const [previousDay, previousWeek, previousMonth] = await Promise.all([
-    prisma.solve.findMany({
-      where: { userId, solvedAt: { gte: yStart, lt: yEnd } },
-      orderBy: { solvedAt: "asc" }
-    }),
-    prisma.solve.findMany({
-      where: { userId, solvedAt: { gte: wStart, lt: wEnd } },
-      orderBy: { solvedAt: "asc" }
-    }),
-    prisma.solve.findMany({
-      where: { userId, solvedAt: { gte: mStart, lt: mEnd } },
-      orderBy: { solvedAt: "asc" }
-    })
+  const [previousDayResult, previousWeekResult, previousMonthResult] =
+  await Promise.all([
+    prisma.query(
+      `
+      SELECT *
+      FROM "Solve"
+      WHERE "userId" = $1
+        AND "solvedAt" >= $2
+        AND "solvedAt" < $3
+      ORDER BY "solvedAt" ASC
+      `,
+      [userId, yStart, yEnd]
+    ),
+
+    prisma.query(
+      `
+      SELECT *
+      FROM "Solve"
+      WHERE "userId" = $1
+        AND "solvedAt" >= $2
+        AND "solvedAt" < $3
+      ORDER BY "solvedAt" ASC
+      `,
+      [userId, wStart, wEnd]
+    ),
+
+    prisma.query(
+      `
+      SELECT *
+      FROM "Solve"
+      WHERE "userId" = $1
+        AND "solvedAt" >= $2
+        AND "solvedAt" < $3
+      ORDER BY "solvedAt" ASC
+      `,
+      [userId, mStart, mEnd]
+    ),
   ]);
+
+const previousDay = previousDayResult.rows;
+const previousWeek = previousWeekResult.rows;
+const previousMonth = previousMonthResult.rows;
 
   return {
     previousDay,

@@ -26,9 +26,16 @@ export const checkAuth = async (
     const payload = verifyToken(token); // { userId: string }
 
     // 🔥 Load fresh user from DB
-    const dbUser = await prisma.user.findUnique({
-      where: { id: payload.userId },
-    });
+    const result = await prisma.query(
+  `
+  SELECT *
+  FROM "User"
+  WHERE id = $1
+  `,
+  [payload.userId]
+);
+
+const dbUser = result.rows[0] ?? null;
 
     if (!dbUser) {
       return res.status(401).json({ error: "User not found" });

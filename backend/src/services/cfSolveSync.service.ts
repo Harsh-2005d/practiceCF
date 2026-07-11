@@ -1,6 +1,6 @@
 import { prisma } from "../prismac";
 import { CodeforcesResponse, CfSubmission } from "../types/codeforces";
-
+import { randomUUID } from "crypto";
 const PAGE_SIZE = 100;
 const MAX_PAGES = 10;     // hard safety cap
 const DELAY_MS = 300;     // prevent CF rate-limit
@@ -74,10 +74,34 @@ export async function syncLast30DaysSolves(
 
   if (solves.length === 0) return;
 
-  await prisma.solve.createMany({
-    data: solves,
-    skipDuplicates: true
-  });
+  await Promise.all(
+  solves.map((solve) =>
+    prisma.query(
+      `
+      INSERT INTO "Solve" (
+        id,
+        "userId",
+        "contestId",
+        "index",
+        "problemName",
+        link,
+        "solvedAt"
+      )
+      VALUES ($1, $2, $3, $4, $5, $6, $7)
+      ON CONFLICT ("userId", "contestId", "index") DO NOTHING
+      `,
+      [
+        randomUUID(),
+        solve.userId,
+        solve.contestId,
+        solve.index,
+        solve.problemName,
+        solve.link,
+        solve.solvedAt,
+      ]
+    )
+  )
+);
 }
 
 export async function syncLast24HoursSolves(
@@ -95,6 +119,7 @@ export async function syncLast24HoursSolves(
     userId: string;
     contestId: number;
     index: string;
+    problemName: string|null;
     link: string;
     solvedAt: Date;
   }[] = [];
@@ -131,6 +156,7 @@ export async function syncLast24HoursSolves(
         userId,
         contestId: s.problem.contestId!,
         index: s.problem.index!,
+        problemName: s.problem.name!,
         link: `https://codeforces.com/problemset/problem/${s.problem.contestId}/${s.problem.index}`,
         solvedAt: new Date(s.creationTimeSeconds * 1000)
       });
@@ -142,9 +168,33 @@ export async function syncLast24HoursSolves(
 
   if (solves.length === 0) return;
 
-  await prisma.solve.createMany({
-    data: solves,
-    skipDuplicates: true
-  });
+  await Promise.all(
+  solves.map((solve) =>
+    prisma.query(
+      `
+      INSERT INTO "Solve" (
+        id,
+        "userId",
+        "contestId",
+        "index",
+        "problemName",
+        link,
+        "solvedAt"
+      )
+      VALUES ($1, $2, $3, $4, $5, $6, $7)
+      ON CONFLICT ("userId", "contestId", "index") DO NOTHING
+      `,
+      [
+        randomUUID(),
+        solve.userId,
+        solve.contestId,
+        solve.index,
+        solve.problemName,
+        solve.link,
+        solve.solvedAt,
+      ]
+    )
+  )
+);
 }
 

@@ -41,22 +41,39 @@ export const googleOAuthLogin = async (code: string) => {
   }
  
   // 3. Find or create user in DB
-  let user = await prisma.user.findUnique({
-    where: { oauthId: googleUser.sub }
-  });
+  let result = await prisma.query(
+  `
+  SELECT *
+  FROM "User"
+  WHERE "oauthId" = $1
+  `,
+  [googleUser.sub]
+);
 
-  if (!user) {
-  
-    user = await prisma.user.create({
-      data: {
-        id: randomUUID(),
-        email: googleUser.email,
-        oauthProvider: "google",
-        oauthId: googleUser.sub
-      }
-    });
+let user = result.rows[0] ?? null;
 
-  }
+if (!user) {
+  result = await prisma.query(
+    `
+    INSERT INTO "User" (
+      id,
+      email,
+      "oauthProvider",
+      "oauthId"
+    )
+    VALUES ($1, $2, $3, $4)
+    RETURNING *
+    `,
+    [
+      randomUUID(),
+      googleUser.email,
+      "google",
+      googleUser.sub,
+    ]
+  );
+
+  user = result.rows[0];
+}
 
   // 4. Issue your JWT
   const token = signToken({ userId: user.id, email: user.email });

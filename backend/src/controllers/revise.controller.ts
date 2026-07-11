@@ -8,11 +8,17 @@ export const reviseController = async (req: AuthedRequest, res: Response) => {
     // const userId = "332492f5-2627-4a1f-bc5a-a596a44973af";
 
 
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: { handle: true }
-    });
+    const result = await prisma.query(
+  `
+  SELECT handle
+  FROM "User"
+  WHERE id = $1
+  `,
+  [userId]
+);
 
+const user = result.rows[0] ?? null;
+    console.log(userId,user?.handle)
     if (!user?.handle) {
       return res.status(400).json({
         error: "Codeforces handle not linked"

@@ -28,17 +28,18 @@ export async function getSolves(req: Request, res: Response) {
     fromDate.setHours(0, 0, 0, 0);
   }
 
-  const solves = await prisma.solve.findMany({
-    where: {
-      userId,
-      solvedAt: {
-        gte: fromDate
-      }
-    },
-    orderBy: {
-      solvedAt: "desc"
-    }
-  });
+  const result = await prisma.query(
+  `
+  SELECT *
+  FROM solves
+  WHERE user_id = $1
+    AND solved_at >= $2
+  ORDER BY solved_at DESC
+  `,
+  [userId, fromDate]
+);
+
+const solves = result.rows;
 
   res.json({ solves });
 }

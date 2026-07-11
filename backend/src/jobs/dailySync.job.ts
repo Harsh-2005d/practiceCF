@@ -6,9 +6,14 @@ const CONCURRENCY = 5;
 export async function runDailyCfSyncJob() {
   console.log("Starting daily Codeforces sync...");
 
-  const users = await prisma.user.findMany({
-    select: { id: true, handle: true }
-  });
+  const result = await prisma.query(
+  `
+  SELECT id, handle
+  FROM users
+  `
+);
+
+const users = result.rows;
 
   let index = 0;
 

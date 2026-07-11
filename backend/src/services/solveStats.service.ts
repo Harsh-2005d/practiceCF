@@ -7,17 +7,17 @@ export async function getLast30DaysHistogram(userId: string) {
   const start = new Date(today);
   start.setDate(start.getDate() - 29);
 
-  const solves = await prisma.solve.findMany({
-    where: {
-      userId,
-      solvedAt: {
-        gte: start,
-      },
-    },
-    select: {
-      solvedAt: true,
-    },
-  });
+  const result = await prisma.query(
+  `
+  SELECT "solvedAt"
+  FROM "Solve"
+  WHERE "userId" = $1
+    AND "solvedAt" >= $2
+  `,
+  [userId, start]
+);
+
+const solves = result.rows;
 
   // initialize 30-day array
   const counts = Array(30).fill(0);

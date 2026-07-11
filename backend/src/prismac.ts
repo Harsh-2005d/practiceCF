@@ -1,10 +1,39 @@
 import "dotenv/config";
-import { PrismaPg } from '@prisma/adapter-pg'
-import { PrismaClient } from '../generated/prisma/client'
+import pg from "pg";
 
-const connectionString = `${process.env.DATABASE_URL}`
-
-const adapter = new PrismaPg({ connectionString })
-const prisma = new PrismaClient({ adapter })
-
-export { prisma }
+export const prisma = new pg.Client({
+  user: "avnadmin",
+  password: process.env.DATABASE_PASS, // Don't hardcode this
+  host: "practicecf-dahiyaharsh2005-886f.d.aivencloud.com",
+  port: 12359,
+  database: "defaultdb",
+  ssl: {
+    rejectUnauthorized: true,
+    ca: `-----BEGIN CERTIFICATE-----
+MIIEUDCCArigAwIBAgIUFGcpgXgJIKFNN5UJOycpq1lrknYwDQYJKoZIhvcNAQEM
+BQAwQDE+MDwGA1UEAww1MWVlNzY1YzQtZDkyOS00YjM3LWExMTYtYWI0ZWQ1NDk4
+YjAzIEdFTiAxIFByb2plY3QgQ0EwHhcNMjYwMTIxMTc0MDA4WhcNMzYwMTE5MTc0
+MDA4WjBAMT4wPAYDVQQDDDUxZWU3NjVjNC1kOTI5LTRiMzctYTExNi1hYjRlZDU0
+OThiMDMgR0VOIDEgUHJvamVjdCBDQTCCAaIwDQYJKoZIhvcNAQEBBQADggGPADCC
+AYoCggGBAI2BdMCjfnbi5zDdaRiJ9VeOGAV2J3/woeyzDb7USU/6blqy4ioHm4rT
+YVuGri9WCPsGOBmRNaJk4g8CCHCEJUavN8tuo3hem4OJPZx8c5K4zCF7zz0oQTpU
+rosW/YSLSd7unNmeCuBPh3VbKEWk0UgvL/zJYVKwNR7guUo4YfYepkzDPkHydMBf
+kjPn8FV7YW33O6xU93iQ0L4wgbGm4qQ37U1Ss8ABRla0Uiw6cLECuzHPkbXL+2iR
+RSteOPunnJ9Q1APQpIXT4j4y6XnlVEKGZWX611BLBayLw9jBnVcGZo017AWlqt3t
+ChSs1LDQh0AXGB4H1OsOshV8kSDSHCOuBQm2YH1bQ5bFbYIgfNF7hvYxDUVwL49g
+WM4Bstjnl9L5GoT/7TKQ6nZPbsccM7W0n3Mh8U+6pJ1gj/DUSUchpQu3U2KasXnB
+cuxnOXXRNGz2yu4ScdvzKC8B+RGrTLV1GucqcOl2IgR7iWLKs/KaIv0CAVwayyTy
+1ceJB0KOcQIDAQABo0IwQDAdBgNVHQ4EFgQUgH+44z/iypYro1Xmvve0veEOVyAw
+EgYDVR0TAQH/BAgwBgEB/wIBADALBgNVHQ8EBAMCAQYwDQYJKoZIhvcNAQEMBQAD
+ggGBAFbj7DBAkGyAr9mOo1yc9a6l2iOKcVCsnndGo29iC2rk3UaMpiERK7+vF4dH
+b/dKxOoIsRZncXVgkMyqO9X4bdp2Gi+771/2OMwoYl8h+sTCoanO+fcDrudaJ4cL
+ryNMO1ic7UfsWmqg6MVk+fUeePNPM12wt55lTbu1k0MFOurSSerONoqJBxkW305k
+/8ByfZjSh9R5vsA2osrqkihEtafTMZIF0aMONVnAgEoC2fT1eUPWbZtKiDLPokO8
+tLixqrOXx/07jo2ZEyhQoJ6vgB4P3zGO4Sfqo2CnDGZC9LyeN15XQ87MN3K/AelW
+TIWuuyJ+GAN0ZrElqwfUaqY12C84PogEmbOjtR0XMqhvwpga7XxpGjKWk0/4fK3O
+wBbHyMeWRWDa7OQ4P+YJhGVylIGmOsHPmsTrcjX3mJiVh5L1kxeqsNuQOz3awDJy
+52bLSC1UXhWgKKcPuys27rjv+WW5EDArVwVldsA9CjmJSBhTw8rZWfC8ZI3JKgMt
+IDHFCA==
+-----END CERTIFICATE-----`,
+  },
+});

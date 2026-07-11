@@ -11,6 +11,7 @@ export const googleCallbackController = async (req: Request, res: Response) => {
       return res.status(400).send("Missing OAuth code");
     }
     // console.log("CALLBACK HIT");
+
     const { user, token } = await googleOAuthLogin(code);
     // console.log("redirecting");
     res.cookie("token", token, {
