@@ -1,100 +1,58 @@
 import { prisma } from "../prismac";
 
-const IST_OFFSET_MS = 0;
+const IST_OFFSET_MS = 5.5 * 60 * 60 * 1000;
 
-function getISTDayRangeUTCFromISTDate(istDate: Date) {
-  // Start of that day in IST
-  const startIST = new Date(istDate);
-  startIST.setHours(0, 0, 0, 0);
-
-  // Convert IST start → UTC
-  const startUTC = new Date(startIST.getTime() - IST_OFFSET_MS);
-
-  // End = +1 day (still in UTC)
-  const endUTC = new Date(startUTC);
-  endUTC.setUTCDate(endUTC.getUTCDate() + 1);
-
+function getIstDayRange(date: Date) {
+  const startUTC = new Date(
+    Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()) - IST_OFFSET_MS,
+  );
+  const endUTC = new Date(startUTC.getTime() + 24 * 60 * 60 * 1000);
   return { startUTC, endUTC };
 }
 
-export const getRevisionSolves = async (userId: string) => {
-  // 1️⃣ Compute now in IST
-  const nowUTC = new Date();
-  const nowIST = new Date(nowUTC.getTime() + IST_OFFSET_MS);
+export function getRevisionDayKey(now = new Date()) {
+  const istDate = new Date(now.getTime() + IST_OFFSET_MS);
+  return `${istDate.getUTCFullYear()}-${String(istDate.getUTCMonth() + 1).padStart(2, "0")}-${String(istDate.getUTCDate()).padStart(2, "0")}`;
+}
 
-  // 2️⃣ Target days in IST
+export function getSecondsUntilNextIstDay(now = new Date()) {
+  const istDate = new Date(now.getTime() + IST_OFFSET_MS);
+  const nextIstMidnight =
+    Date.UTC(istDate.getUTCFullYear(), istDate.getUTCMonth(), istDate.getUTCDate() + 1) - IST_OFFSET_MS;
+  return Math.max(1, Math.ceil((nextIstMidnight - now.getTime()) / 1000));
+}
+
+export const getRevisionSolves = async (userId: string, now = new Date()) => {
+  const nowIST = new Date(now.getTime() + IST_OFFSET_MS);
   const yesterdayIST = new Date(nowIST);
-  yesterdayIST.setDate(yesterdayIST.getDate() - 1);
-
+  yesterdayIST.setUTCDate(yesterdayIST.getUTCDate() - 1);
   const weekBackIST = new Date(nowIST);
-  weekBackIST.setDate(weekBackIST.getDate() - 7);
-
+  weekBackIST.setUTCDate(weekBackIST.getUTCDate() - 7);
   const monthBackIST = new Date(nowIST);
-  monthBackIST.setDate(monthBackIST.getDate() - 30);
+  monthBackIST.setUTCDate(monthBackIST.getUTCDate() - 30);
 
-  // 3️⃣ Convert IST days → UTC ranges
-  const { startUTC: yStart, endUTC: yEnd } =
-    getISTDayRangeUTCFromISTDate(yesterdayIST);
+  const { startUTC: yStart, endUTC: yEnd } = getIstDayRange(yesterdayIST);
+  const { startUTC: wStart, endUTC: wEnd } = getIstDayRange(weekBackIST);
+  const { startUTC: mStart, endUTC: mEnd } = getIstDayRange(monthBackIST);
 
-  const { startUTC: wStart, endUTC: wEnd } =
-    getISTDayRangeUTCFromISTDate(weekBackIST);
-
-  const { startUTC: mStart, endUTC: mEnd } =
-    getISTDayRangeUTCFromISTDate(monthBackIST);
-
-  console.log("FINAL IST DAY RANGES (UTC):", {
-    yesterday: [yStart.toISOString(), yEnd.toISOString()],
-    weekBack: [wStart.toISOString(), wEnd.toISOString()],
-    monthBack: [mStart.toISOString(), mEnd.toISOString()]
-  });
-
-  const [previousDayResult, previousWeekResult, previousMonthResult] =
-  await Promise.all([
+  const [previousDayResult, previousWeekResult, previousMonthResult] = await Promise.all([
     prisma.query(
-      `
-      SELECT *
-      FROM "Solve"
-      WHERE "userId" = $1
-        AND "solvedAt" >= $2
-        AND "solvedAt" < $3
-      ORDER BY "solvedAt" ASC
-      `,
-      [userId, yStart, yEnd]
+      `SELECT * FROM "Solve" WHERE "userId" = $1 AND "solvedAt" >= $2 AND "solvedAt" < $3 ORDER BY "solvedAt" ASC`,
+      [userId, yStart, yEnd],
     ),
-
     prisma.query(
-      `
-      SELECT *
-      FROM "Solve"
-      WHERE "userId" = $1
-        AND "solvedAt" >= $2
-        AND "solvedAt" < $3
-      ORDER BY "solvedAt" ASC
-      `,
-      [userId, wStart, wEnd]
+      `SELECT * FROM "Solve" WHERE "userId" = $1 AND "solvedAt" >= $2 AND "solvedAt" < $3 ORDER BY "solvedAt" ASC`,
+      [userId, wStart, wEnd],
     ),
-
     prisma.query(
-      `
-      SELECT *
-      FROM "Solve"
-      WHERE "userId" = $1
-        AND "solvedAt" >= $2
-        AND "solvedAt" < $3
-      ORDER BY "solvedAt" ASC
-      `,
-      [userId, mStart, mEnd]
+      `SELECT * FROM "Solve" WHERE "userId" = $1 AND "solvedAt" >= $2 AND "solvedAt" < $3 ORDER BY "solvedAt" ASC`,
+      [userId, mStart, mEnd],
     ),
   ]);
 
-const previousDay = previousDayResult.rows;
-const previousWeek = previousWeekResult.rows;
-const previousMonth = previousMonthResult.rows;
-
   return {
-    previousDay,
-    previousWeek,
-    previousMonth
+    previousDay: previousDayResult.rows,
+    previousWeek: previousWeekResult.rows,
+    previousMonth: previousMonthResult.rows,
   };
 };
-

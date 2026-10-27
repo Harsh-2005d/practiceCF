@@ -1,8 +1,9 @@
 import { Router } from "express";
 import { googleCallbackController, logoutController, meController} from "../controllers/auth.controller";
 import { checkAuth, } from "../middleware/auth.middleware";
-
+import "dotenv/config"
 const router = Router();
+
 
 // Step 1: Redirect user to Google
 router.get("/auth/google", (req, res) => {

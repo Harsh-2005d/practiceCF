@@ -30,4 +30,34 @@ model User {
   oauthId      String   @unique
   createdAt    DateTime @default(now())
   Solve        Solve[]
+  ProblemNote  ProblemNote[]
+  Blog         Blog[]
+}
+
+model ProblemNote {
+  id        String   @id @default(uuid())
+  userId    String
+  problemId String
+  content   String   @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  User      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, problemId])
+}
+
+model Blog {
+  id        String   @id @default(uuid())
+  userId    String
+  title     String
+  category  String
+  isPublic  Boolean  @default(false)
+  problemId String?
+  content   String   @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  User      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, updatedAt])
+  @@index([isPublic, createdAt, id])
 }

@@ -1,6 +1,7 @@
 import { prisma } from "../prismac";
 import { CodeforcesResponse, CfSubmission } from "../types/codeforces";
 import { randomUUID } from "crypto";
+import { refreshRevisionCache } from "./revisionCache.service";
 const PAGE_SIZE = 100;
 const MAX_PAGES = 10;     // hard safety cap
 const DELAY_MS = 300;     // prevent CF rate-limit
@@ -27,6 +28,7 @@ export async function syncLast30DaysSolves(
     link: string;
     solvedAt: Date;
   }[] = [];
+  let syncSucceeded = true;
 
   while (pagesFetched < MAX_PAGES) {
     pagesFetched++;
@@ -35,12 +37,18 @@ export async function syncLast30DaysSolves(
       `https://codeforces.com/api/user.status?handle=${handle}&from=${from}&count=${PAGE_SIZE}`
     );
 
-    if (!res.ok) break;
+    if (!res.ok) {
+      syncSucceeded = false;
+      break;
+    }
 
     const data =
       (await res.json()) as CodeforcesResponse<CfSubmission>;
 
-    if (data.status !== "OK") break;
+    if (data.status !== "OK") {
+      syncSucceeded = false;
+      break;
+    }
     if (data.result.length === 0) break;
 
     for (const s of data.result) {
@@ -72,11 +80,10 @@ export async function syncLast30DaysSolves(
     await sleep(DELAY_MS);
   }
 
-  if (solves.length === 0) return;
-
-  await Promise.all(
-  solves.map((solve) =>
-    prisma.query(
+  if (solves.length > 0) {
+    await Promise.all(
+      solves.map((solve) =>
+        prisma.query(
       `
       INSERT INTO "Solve" (
         id,
@@ -99,9 +106,12 @@ export async function syncLast30DaysSolves(
         solve.link,
         solve.solvedAt,
       ]
-    )
-  )
-);
+        ),
+      ),
+    );
+  }
+
+  if (syncSucceeded) await refreshRevisionCache(userId);
 }
 
 export async function syncLast24HoursSolves(
@@ -123,6 +133,7 @@ export async function syncLast24HoursSolves(
     link: string;
     solvedAt: Date;
   }[] = [];
+  let syncSucceeded = true;
 
   while (pagesFetched < 3) {
     pagesFetched++;
@@ -131,12 +142,18 @@ export async function syncLast24HoursSolves(
       `https://codeforces.com/api/user.status?handle=${handle}&from=${from}&count=${PAGE_SIZE}`
     );
 
-    if (!res.ok) break;
+    if (!res.ok) {
+      syncSucceeded = false;
+      break;
+    }
 
     const data =
       (await res.json()) as CodeforcesResponse<CfSubmission>;
 
-    if (data.status !== "OK") break;
+    if (data.status !== "OK") {
+      syncSucceeded = false;
+      break;
+    }
     if (data.result.length === 0) break;
 
     for (const s of data.result) {
@@ -166,11 +183,10 @@ export async function syncLast24HoursSolves(
     await sleep(DELAY_MS);
   }
 
-  if (solves.length === 0) return;
-
-  await Promise.all(
-  solves.map((solve) =>
-    prisma.query(
+  if (solves.length > 0) {
+    await Promise.all(
+      solves.map((solve) =>
+        prisma.query(
       `
       INSERT INTO "Solve" (
         id,
@@ -193,8 +209,11 @@ export async function syncLast24HoursSolves(
         solve.link,
         solve.solvedAt,
       ]
-    )
-  )
-);
+        ),
+      ),
+    );
+  }
+
+  if (syncSucceeded) await refreshRevisionCache(userId);
 }
 

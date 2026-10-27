@@ -28,18 +28,17 @@ const currentUser = result.rows[0] ?? null;
     throw new Error("Codeforces handle does not exist");
   }
 
-  // 2. Ensure handle not already taken
-  const existing= await prisma.query(
-  `
-  SELECT *
-  FROM "User"
-  WHERE id = $1
-  `,
-  [userId]
-);
+  // 2. Ensure handle not already taken by another user
+  const existing = await prisma.query(
+    `
+    SELECT id
+    FROM "User"
+    WHERE handle = $1 AND id != $2
+    `,
+    [cfUser.handle, userId]
+  );
 
-
-  if (existing) {
+  if (existing.rows.length > 0) {
     throw new Error("Handle already linked to another user");
   }
 

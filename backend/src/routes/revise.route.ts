@@ -5,12 +5,20 @@ import { setHandleController } from "../controllers/setHandler.controller";
 import { histogramController } from "../controllers/stats.controller";
 import {refreshController } from "../controllers/refresh.controller"
 import { runDailyCfSyncJob } from "../jobs/dailySync.job";
+import {
+  deleteProblemNote,
+  getProblemNote,
+  saveProblemNote,
+} from "../controllers/problemNote.controller";
 const router = Router();
 
 router.post("/handle", checkAuth, setHandleController);
 router.get("/revise", checkAuth, reviseController);
 router.get("/stats/histogram", checkAuth, histogramController);
 router.get("/refresh/user", checkAuth, refreshController);
+router.get("/problems/:problemId/note", checkAuth, getProblemNote);
+router.put("/problems/:problemId/note", checkAuth, saveProblemNote);
+router.delete("/problems/:problemId/note", checkAuth, deleteProblemNote);
 router.post("/sync", async (req, res) => {
   console.log("recieved")
   console.log(req.headers["cron-secret"] )

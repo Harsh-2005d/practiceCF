@@ -7,11 +7,12 @@ export async function runDailyCfSyncJob() {
   console.log("Starting daily Codeforces sync...");
 
   const result = await prisma.query(
-  `
-  SELECT id, handle
-  FROM users
-  `
-);
+    `
+    SELECT id, handle
+    FROM "User"
+    WHERE handle IS NOT NULL
+    `
+  );
 
 const users = result.rows;
 
